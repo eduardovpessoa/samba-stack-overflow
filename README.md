@@ -12,7 +12,6 @@ Built solo in one afternoon at the Cloud Native Hackathon (Salt Lake City,
 November 9, 2026).
 
 - **Live:** https://samba-stack-overflow.cnh.radarhq.io
-- **Demo script:** [docs/demo.md](docs/demo.md)
 
 *An independent hackathon project. It is not affiliated with or endorsed by
 Stack Overflow or Stack Exchange Inc.*
@@ -243,7 +242,6 @@ on the page and in Dash0, and ask Agent0 what changed.
 | `app/` | Backend: API, Elasticsearch store, telemetry, tests |
 | `web/` | Frontend: React, TypeScript, Vite |
 | `docs/api.md` | The API contract both sides follow |
-| `docs/demo.md` | The demo, as a script to read out loud |
 | `docs/investigations/` | What Dash0's Agent0 and Radar's AI found, and what was done |
 | `deploy/`, `argocd/` | Kubernetes manifests and the Argo CD Application |
 | `observability/` | The Dash0 dashboard and alert rule, as code |

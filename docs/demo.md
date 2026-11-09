@@ -195,6 +195,7 @@ practice incident, and search again.
 | [#3](https://github.com/eduardovpessoa/samba-stack-overflow/pull/3) | Radar's findings fixed. Checks went from 3 to 0. |
 | [#4](https://github.com/eduardovpessoa/samba-stack-overflow/pull/4) | Probe timing, set from a Dash0 measurement after Radar showed the warning. |
 | [#5](https://github.com/eduardovpessoa/samba-stack-overflow/pull/5) | The before and after of three releases, written down. |
+| [#6](https://github.com/eduardovpessoa/samba-stack-overflow/pull/6) | Shared setlists, "Fill my free time", visible round trips, and the installable app. |
 
 The long versions, with times, numbers and the AI tools' own words, are in
 `docs/investigations/`.

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
-import { api, describeError, type ChaosMode, type Meta } from "../api";
+import { useEffect, useState } from "react";
+import { api, describeError, type ChaosMode, type Meta, type SearchDiagnostics } from "../api";
+import { copyText } from "../lib/clipboard";
 import { ENGINE_LABEL, plural } from "../lib/format";
 import { AutoThemeIcon, ChevronDownIcon, ListIcon, MoonIcon, SlidersIcon, SunIcon } from "./Icons";
 import { BrandMark } from "./Shared";
@@ -83,14 +84,32 @@ export function Header({ setlistCount, showAsk, textScale, onTextScale, theme, o
   );
 }
 
-type OpsProps = { meta: Meta; onChaosChange: (mode: ChaosMode) => void };
+type OpsProps = {
+  meta: Meta;
+  onChaosChange: (mode: ChaosMode) => void;
+  /** From the most recent search, or null before any search or on an older server. */
+  diagnostics: SearchDiagnostics | null;
+};
 
 /** A small drawer for the people running the demo. Kept out of the attendee's way. */
-export function Ops({ meta, onChaosChange }: OpsProps) {
+export function Ops({ meta, onChaosChange, diagnostics }: OpsProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Kept in memory only: never written to storage or the URL.
   const [opsToken, setOpsToken] = useState("");
+  const [traceCopy, setTraceCopy] = useState<"idle" | "copied" | "failed">("idle");
+  const traceId = diagnostics?.traceId ?? null;
+
+  // A new search means a new trace: the old "Copied" no longer applies.
+  useEffect(() => {
+    setTraceCopy("idle");
+  }, [traceId]);
+
+  const copyTrace = () => {
+    if (!traceId) return;
+    void copyText(traceId).then((ok) => setTraceCopy(ok ? "copied" : "failed"));
+  };
+
   const on = meta.chaos.mode === "n-plus-one";
   const locked = meta.chaos.protected && opsToken.trim().length === 0;
 
@@ -131,6 +150,33 @@ export function Ops({ meta, onChaosChange }: OpsProps) {
             <dt>Meaning search</dt>
             <dd>{meta.search.semantic ? "Available" : "Not available"}</dd>
           </div>
+          {diagnostics && (
+            <>
+              <div>
+                <dt>Served by</dt>
+                <dd>{diagnostics.servedBy}</dd>
+              </div>
+              <div className="ops__trace">
+                <dt>Last trace</dt>
+                <dd>
+                  <span>{traceId ?? "none"}</span>
+                  {traceId && (
+                    <button
+                      type="button"
+                      className="btn btn--small"
+                      onClick={copyTrace}
+                      aria-label="Copy the trace id of the last search"
+                    >
+                      Copy
+                    </button>
+                  )}
+                  <span className="ops__trace-status" role="status" aria-live="polite">
+                    {traceCopy === "copied" ? "Copied" : traceCopy === "failed" ? "Couldn't copy: select it by hand" : ""}
+                  </span>
+                </dd>
+              </div>
+            </>
+          )}
         </dl>
 
         <div className="ops__chaos">

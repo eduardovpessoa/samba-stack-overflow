@@ -61,6 +61,14 @@ export type Meta = {
   chaos: { mode: ChaosMode; protected: boolean };
 };
 
+/** How one search was answered. Shown to people on purpose. */
+export type SearchDiagnostics = {
+  roundTrips: number;
+  strategy: "batched" | "sequential";
+  traceId: string | null;
+  servedBy: string;
+};
+
 export type SearchResponse = {
   query: string;
   mode: SearchMode;
@@ -68,6 +76,8 @@ export type SearchResponse = {
   tookMs: number;
   total: number;
   results: SessionHit[];
+  // Optional on purpose: an older server does not send it, and nothing breaks.
+  diagnostics?: SearchDiagnostics;
 };
 
 export type SessionResponse = { session: Session; related: Session[] };
@@ -75,6 +85,20 @@ export type SessionResponse = { session: Session; related: Session[] };
 export type AgendaResponse = {
   items: Session[];
   conflicts: { a: string; b: string; overlapMinutes: number }[];
+};
+
+/** Talks that fit the free time around a setlist, closest in meaning first. */
+export type SuggestResponse = { basedOn: number; results: Session[] };
+
+export type SetlistSaved = { id: string; count: number };
+
+/** A setlist someone saved and shared. It never changes once saved. */
+export type SharedSetlist = {
+  id: string;
+  name: string;
+  createdAt: string;
+  items: Session[];
+  conflicts: AgendaResponse["conflicts"];
 };
 
 export type PersonHit = Person & { score: number; highlight: Segment[] | null };
@@ -216,6 +240,14 @@ export const api = {
 
   agenda: (ids: string[], signal?: AbortSignal) => postJson<AgendaResponse>("/api/agenda", { ids }, signal),
 
+  suggest: (ids: string[], signal?: AbortSignal) =>
+    postJson<SuggestResponse>("/api/agenda/suggest", { ids }, signal),
+
+  saveSetlist: (ids: string[], signal?: AbortSignal) => postJson<SetlistSaved>("/api/setlists", { ids }, signal),
+
+  setlist: (id: string, signal?: AbortSignal) =>
+    request<SharedSetlist>(`/api/setlists/${encodeURIComponent(id)}`, { signal }),
+
   people: (q: string, signal?: AbortSignal) => {
     const qs = new URLSearchParams({ q });
     return request<PeopleResponse>(`/api/people?${qs.toString()}`, { signal });
@@ -235,6 +267,11 @@ export const api = {
 /** Link the browser can download directly. Ids are session ids, never personal data. */
 export function agendaIcsUrl(ids: string[]): string {
   return `/api/agenda.ics?ids=${ids.map(encodeURIComponent).join(",")}`;
+}
+
+/** The link that opens a shared setlist. The id is a random setlist id, never personal data. */
+export function sharedSetlistUrl(id: string): string {
+  return `${window.location.origin}${window.location.pathname}?setlist=${encodeURIComponent(id)}`;
 }
 
 export function isAbort(error: unknown): boolean {

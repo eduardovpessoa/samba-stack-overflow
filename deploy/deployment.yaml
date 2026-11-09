@@ -116,14 +116,17 @@ spec:
               path: /healthz
               port: http
             periodSeconds: 10
-          # Node and OpenTelemetry need a few seconds before the port opens.
-          # Probing from second zero logged "Startup probe failed: connection
-          # refused" Warning events on every healthy rollout (seen in Radar).
+          # A fresh pod needs about 3s to open its port and, measured in Dash0,
+          # up to 3s more to warm up: the first connection to Elasticsearch
+          # alone took 2.7s. Probing earlier logged Warning events on healthy
+          # rollouts (startup "connection refused" at 0s delay, then readiness
+          # 503 at 5s; both seen in Radar). 8s clears the measured warm-up.
+          # A slower start is still fine: readiness simply waits for it.
           startupProbe:
             httpGet:
               path: /healthz
               port: http
-            initialDelaySeconds: 5
+            initialDelaySeconds: 8
             periodSeconds: 2
             failureThreshold: 30
           securityContext:

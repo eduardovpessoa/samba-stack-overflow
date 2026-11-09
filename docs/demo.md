@@ -40,10 +40,10 @@ Open these tabs before you start:
    `.env.local`) and switch on the practice incident. Search three times.
 2. Dash0 dashboard: the **Elasticsearch round trips** panel jumps from 4 to
    15. Be honest about latency: inside the cluster each extra round trip
-   costs about 14 ms, so searches only go from about 500 ms to 560 ms. From
-   a slow network the same bug tripled it (0.85 s to 2.5 s). "That is why we
-   chart round trips and not only latency: the bug is there before users
-   feel it."
+   costs about 15 ms, so the same search goes from about 390 ms to about
+   560 ms (11 extra round trips). From a slow network the same bug tripled
+   it (0.85 s to 2.5 s). "That is why we chart round trips and not only
+   latency: the bug is there before users feel it."
 3. Show `docs/investigations/2026-11-09-dash0-agent0-slow-search.md`.
    "I asked Agent0 through Dash0's MCP server. It compared a slow and a fast
    trace of the same query and found 12 sequential Elasticsearch calls where
@@ -55,11 +55,30 @@ Open these tabs before you start:
 
 ## 1:55 Kubernetes, with Radar (35 s)
 
-1. Radar Cloud, the `app` Deployment: "Every push to main is built by GitHub
-   Actions and rolled out by Argo CD. This is the timeline of today."
-2. Open the AI investigation. Say what it found and what you did.
-   <!-- Fill in after the investigation: resource, root cause, fix. -->
-3. Show **Checks** before and after.
+Open tabs: Radar Cloud > **Timeline** (namespace
+`team-samba-stack-overflow`), **AI investigations**, and **Checks**. The
+full write-up with times and quotes is
+`docs/investigations/2026-11-09-radar-first-release.md`.
+
+1. **Timeline.** "Every push to main is built by GitHub Actions and rolled
+   out by Argo CD. Here is the first release: the Application showed a
+   ComparisonError because I created it before the code was merged, the
+   merge cleared it, and 24 seconds after the sync both new pods were
+   healthy. I read all of this through Radar's MCP server from my coding
+   agent."
+2. **AI investigation** on Deployment `app`. "I asked Radar's AI SRE to
+   check the release. Verdict: healthy, certainty established. It still
+   found something: a 'startup probe failed, connection refused' warning on
+   a perfectly healthy start."
+3. **The follow-up.** "I asked which of Radar's Checks findings actually
+   matter for a two-replica web app. Its answer: the unused Kubernetes API
+   token and the missing PodDisruptionBudget are real risks, the missing
+   topology spread is a latent one, and the probe warning goes away with an
+   initial delay."
+4. **Checks, before and after.** Show `docs/evidence/radar-checks-before-1.png`
+   next to the live Checks page filtered to our namespace. "Three findings
+   on our Deployment before. All four fixes went through pull request #3:
+   Gitar reviewed it, Argo CD rolled it out, and Radar shows the result."
 
 ## 2:30 Code quality, with Gitar (20 s)
 

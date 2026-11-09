@@ -24,7 +24,7 @@ function sessionContext(s) {
     `level: ${s.level}`,
     `track: ${s.track}`,
     `speakers: ${s.speakers.map((p) => `${p.name} (${p.company})`).join(', ')}`,
-    `captions: ${s.accessibility.captions}, step-free: ${s.accessibility.stepFree}`,
+    `captions: ${s.accessibility.captions}, step-free: ${s.accessibility.stepFree}, sign-language: ${s.accessibility.signLanguage}, low-sensory: ${s.accessibility.lowSensory}`,
     `description: ${s.description}`,
   ].join('\n');
 }

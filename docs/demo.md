@@ -62,8 +62,15 @@ Open these tabs before you start:
 1. Open the pull request. "Every feature landed through a pull request that
    Gitar reviewed against this project's own rules: the API contract, no
    Elasticsearch call inside a loop, never invent accessibility data."
-2. Show one finding and the commit that fixed it.
-   <!-- Fill in after the review: finding and commit. -->
+2. Show the two findings on pull request #1 and how each was closed:
+   - **Security:** `POST /api/chaos` was open on a public URL, so anyone
+     could keep the N+1 regression switched on. Fixed in `785f9be`: the
+     switch now needs an ops token from the cluster Secret.
+   - **Bug:** the Ask prompt passed only two of the four accessibility
+     fields to the model, so it would guess or say "not published" wrongly.
+     Gitar pushed that fix itself in `6d0d4c8` when asked.
+3. Point at the labels (`area:search`, `area:deploy`, ...) and the deploy
+   reminder comment: both come from this repo's own rules in `.gitar/rules/`.
 
 ## 2:50 Close (10 s)
 
@@ -88,4 +95,6 @@ Only claim what is ticked.
 - [ ] Dash0: browser monitoring visible from the deployed site
 - [ ] Radar: app deployed in the team cluster through Argo CD
 - [ ] Radar: AI investigation run on a real issue
-- [ ] Gitar: first pull request reviewed, a finding fixed
+- [x] Gitar: pull request #1 reviewed against the project's rules; two real
+      findings, one fixed by hand and one by a commit Gitar pushed; area
+      labels and the deploy reminder applied by repository rules

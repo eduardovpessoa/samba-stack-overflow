@@ -192,3 +192,36 @@ to open the port plus 3.1 seconds), not on having seen it happen. The slow
 first connection on release 2 looks like a one-off at that minute; Radar's
 note about a CoreDNS update then is the only lead, and it is unproven.
 
+## 9. The fourth rollout: the probe delay was not enough
+
+Pull request #6 rolled out at 22:56. Radar's events for it show two Warnings:
+`Readiness probe failed: HTTP probe failed with statuscode: 503` at 22:57:04
+and `Readiness probe failed: ... connection refused` at 22:57:10. The second
+one was not traced to a pod; it may be an old pod shutting down.
+
+Dash0's trace of the warm-up on the two new pods:
+
+| Pod | Warm-up | First request to Elasticsearch |
+|---|---|---|
+| `app-56ffff7897-hxxfg` | 437 ms | 140 ms |
+| `app-56ffff7897-pvd48` | **7402 ms** | **5016 ms, then retried: 220 ms** |
+
+So the 8 second delay from pull request #4 was not enough: a pod that needs
+about 3 seconds to open its port and 7.4 seconds to warm up is ready after
+about 10 seconds. Across today's four releases, three of eight fresh pods had
+a slow first connection (2.7 s, 2.7 s and 5.0 s).
+
+What we take from it:
+
+- The warning is the readiness probe doing its job: the pod was not ready
+  and received no traffic. Nothing a visitor could see went wrong.
+- Raising the delay again would make every rollout slower to hide something
+  that happens on some pods. That treats the symptom.
+- The cause is the first outbound connection from a new pod. A request that
+  hangs for almost exactly 5 seconds and then succeeds on retry is what a
+  lost DNS lookup looks like, and Radar keeps flagging the cluster's CoreDNS
+  configuration, but this is a lead, not a finding.
+- **Not fixed.** The next thing to try is fewer DNS lookups for external
+  names (a lower `ndots` in the pod's DNS options) and comparing warm-up
+  times across a few rollouts.
+

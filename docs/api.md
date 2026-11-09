@@ -19,7 +19,13 @@ Codes: `bad_request` (400), `forbidden` (403), `not_found` (404),
 `rate_limited` (429), `ask_unavailable` (503), `search_unavailable` (503),
 `internal` (500).
 
-Every 503 and 429 carries a `Retry-After` header in seconds. A 503 is short-lived
+Every 503 and 429 carries a `Retry-After` header in seconds.
+
+The endpoints that make Elasticsearch work (`/api/search`, `/api/people`,
+`/api/sessions/:id`, `/api/agenda`, `/api/agenda/suggest`,
+`/api/agenda.ics`, `/api/setlists/:id` and `/api/ask`) share a read limit of 240 requests a minute per
+visitor, with 1200 a minute per server behind it: beyond either,
+`429 rate_limited`. A 503 is short-lived
 (the index is warming up after a restart, or a dependency hiccuped), so
 clients should retry once after that delay before showing an error.
 

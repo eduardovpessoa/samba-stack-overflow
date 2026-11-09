@@ -162,8 +162,8 @@ fallback and says so in the UI.
 npm test --prefix app
 ```
 
-40 unit and contract tests on `node:test`. They run against the offline
-store, so they need no credentials and no network.
+Unit and contract tests on `node:test`. They run against the offline store,
+so they need no credentials and no network.
 
 ```bash
 npm run build --prefix web

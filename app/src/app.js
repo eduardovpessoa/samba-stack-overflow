@@ -242,6 +242,9 @@ function createApp({ store, now = () => Date.now() }) {
   // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, next) => {
     if (err instanceof HttpError) {
+      // A 503 here is short-lived (index warm-up, model hiccup): tell clients
+      // when to retry instead of leaving them to guess.
+      if (err.status === 503) res.set('Retry-After', '2');
       return res.status(err.status).json({ error: { code: err.code, message: err.message } });
     }
     if (err?.type === 'entity.parse.failed' || err?.type === 'entity.too.large') {
@@ -253,6 +256,7 @@ function createApp({ store, now = () => Date.now() }) {
       'error.message': String(err?.message || err).slice(0, 500),
     });
     const unavailable = err?.name === 'ConnectionError' || err?.name === 'TimeoutError';
+    if (unavailable) res.set('Retry-After', '2');
     return res.status(unavailable ? 503 : 500).json({
       error: unavailable
         ? { code: 'search_unavailable', message: 'Search is temporarily unavailable. Try again in a moment.' }

@@ -28,12 +28,17 @@ if [[ -z "$token" || -z "$endpoint" ]]; then
   exit 1
 fi
 
+# The server answers with plain JSON, or with a server-sent event stream when
+# it reports progress first. Either way, print only the final JSON-RPC reply.
 rpc() {
   curl -sS -m "${DASH0_MCP_TIMEOUT:-120}" -X POST "$url" \
     -H "Authorization: Bearer ${token}" \
     -H 'Content-Type: application/json' \
     -H 'Accept: application/json, text/event-stream' \
-    -d "$1" | sed -E 's/^data: //; /^event:/d; /^$/d'
+    -d "$1" |
+    sed -nE 's/^data: ?//p; /^\{/p' |
+    jq -c 'select(has("result") or has("error"))' |
+    tail -n 1
 }
 
 case "${1:-}" in

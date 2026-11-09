@@ -18,6 +18,10 @@ Every non-2xx JSON response has this shape:
 Codes: `bad_request` (400), `not_found` (404), `ask_unavailable` (503),
 `search_unavailable` (503), `internal` (500).
 
+Every 503 carries a `Retry-After` header in seconds. A 503 is short-lived
+(the index is warming up after a restart, or a dependency hiccuped), so
+clients should retry once after that delay before showing an error.
+
 ## Shared types
 
 ```ts

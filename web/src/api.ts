@@ -58,7 +58,7 @@ export type Meta = {
   facets: { days: Facet[]; tracks: Facet[]; levels: Facet[]; formats: Facet[] };
   features: { ask: boolean };
   rum: { endpoint: string; token: string; serviceName: string } | null;
-  chaos: { mode: ChaosMode };
+  chaos: { mode: ChaosMode; protected: boolean };
 };
 
 export type SearchResponse = {
@@ -223,7 +223,13 @@ export const api = {
 
   ask: (question: string, signal?: AbortSignal) => postJson<AskResponse>("/api/ask", { question }, signal),
 
-  setChaos: (mode: ChaosMode) => postJson<{ mode: ChaosMode }>("/api/chaos", { mode }),
+  /** Flipping the practice switch needs the ops token wherever the server says it is protected. */
+  setChaos: (mode: ChaosMode, opsToken?: string) =>
+    request<{ mode: ChaosMode }>("/api/chaos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(opsToken ? { "X-Ops-Token": opsToken } : {}) },
+      body: JSON.stringify({ mode }),
+    }),
 };
 
 /** Link the browser can download directly. Ids are session ids, never personal data. */

@@ -6,6 +6,9 @@ module.exports = {
   port: Number(env.PORT || 8080),
   version: env.APP_VERSION || 'dev',
   team: env.TEAM_NAME || 'local',
+  deployEnv: env.DEPLOY_ENV || 'local',
+  // Shared secret for operator-only actions (the practice-incident switch).
+  opsToken: env.OPS_TOKEN || '',
   conference: {
     name: 'Samba Cloud Native Days',
     timezone: 'America/Denver',

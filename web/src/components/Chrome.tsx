@@ -89,14 +89,17 @@ type OpsProps = { meta: Meta; onChaosChange: (mode: ChaosMode) => void };
 export function Ops({ meta, onChaosChange }: OpsProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Kept in memory only: never written to storage or the URL.
+  const [opsToken, setOpsToken] = useState("");
   const on = meta.chaos.mode === "n-plus-one";
+  const locked = meta.chaos.protected && opsToken.trim().length === 0;
 
   const toggle = () => {
     const next: ChaosMode = on ? "off" : "n-plus-one";
     setPending(true);
     setError(null);
     api
-      .setChaos(next)
+      .setChaos(next, meta.chaos.protected ? opsToken.trim() : undefined)
       .then((result) => onChaosChange(result.mode))
       .catch((cause: unknown) => setError(describeError(cause)))
       .finally(() => setPending(false));
@@ -147,12 +150,29 @@ export function Ops({ meta, onChaosChange }: OpsProps) {
             aria-checked={on}
             aria-labelledby="chaos-label"
             aria-describedby="chaos-desc"
-            disabled={pending}
+            disabled={pending || locked}
             onClick={toggle}
           >
             <span className="switch__thumb" />
           </button>
         </div>
+        {meta.chaos.protected && (
+          <label className="ops__token">
+            <span className="field-label">Ops token</span>
+            <input
+              type="password"
+              className="ops__token-input"
+              value={opsToken}
+              onChange={(event) => setOpsToken(event.target.value)}
+              autoComplete="off"
+              spellCheck={false}
+              aria-describedby="ops-token-hint"
+            />
+            <span className="ops__token-hint" id="ops-token-hint">
+              Only the people running this deployment can switch the incident on or off.
+            </span>
+          </label>
+        )}
         {error && (
           <p className="ops__error" role="alert">
             {error}

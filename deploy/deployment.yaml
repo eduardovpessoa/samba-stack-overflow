@@ -59,6 +59,14 @@ spec:
                   name: app-credentials
                   key: openai-api-key
                   optional: true
+            # Needed to flip the practice-incident switch. Without it the switch
+            # stays locked on this deployment.
+            - name: OPS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: app-credentials
+                  key: ops-token
+                  optional: true
             # Tell Dash0 which pod, namespace and deployment each span came from.
             - name: POD_NAME
               valueFrom:

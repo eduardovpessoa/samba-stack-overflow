@@ -230,7 +230,7 @@ export function App() {
   const [detailId, setDetailId] = useState<string | null>(null);
 
   const onChaosChange = (chaosMode: ChaosMode) => {
-    setMeta((current) => (current.status === "ready" ? { status: "ready", data: { ...current.data, chaos: { mode: chaosMode } } } : current));
+    setMeta((current) => (current.status === "ready" ? { status: "ready", data: { ...current.data, chaos: { ...current.data.chaos, mode: chaosMode } } } : current));
   };
 
   const offline = metaData !== null && metaData.search.engine !== "elasticsearch";

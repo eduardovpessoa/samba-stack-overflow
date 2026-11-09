@@ -88,6 +88,63 @@ function parseIds(value, max = 60) {
   return unique;
 }
 
+/** Validate the body of POST /api/setlists. The name is stored and shown as plain text. */
+function parseSetlistBody(body) {
+  if (!body || !Array.isArray(body.ids)) {
+    throw badRequest('Send a JSON body like {"ids": ["s-..."], "name": "optional"}.');
+  }
+  const ids = parseIds(body.ids);
+  if (ids.length === 0) throw badRequest('A setlist needs at least one talk.');
+  let name = '';
+  if (body.name !== undefined && body.name !== null) {
+    if (typeof body.name !== 'string') throw badRequest('name must be text.');
+    name = body.name
+      .replace(/[\u0000-\u001f\u007f]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (name.length > 60) throw badRequest('name must be 60 characters or fewer.');
+  }
+  return { ids, name };
+}
+
+/** A setlist id from the URL. Anything that cannot be one is simply "not found". */
+function parseSetlistId(value) {
+  const id = oneString(value);
+  if (!/^[A-Za-z0-9_-]{8,24}$/.test(id)) throw new HttpError(404, 'not_found', 'No setlist with that id.');
+  return id;
+}
+
+/**
+ * A small sliding-window limiter for public write endpoints, with one window
+ * per key (a client address, or "" for everyone together). It is per process,
+ * so it bounds what one pod will accept, not the whole deployment.
+ */
+function createRateLimiter({ limit, windowMs, now = () => Date.now(), maxKeys = 5000 }) {
+  const windows = new Map();
+  const fresh = (stamps, cutoff) => stamps.filter((t) => t > cutoff);
+  return {
+    /** Would a take() for this key succeed right now? Does not spend anything. */
+    allows(key = '') {
+      return fresh(windows.get(key) || [], now() - windowMs).length < limit;
+    },
+    take(key = '') {
+      const cutoff = now() - windowMs;
+      const stamps = fresh(windows.get(key) || [], cutoff);
+      if (stamps.length >= limit) {
+        windows.set(key, stamps);
+        return false;
+      }
+      stamps.push(now());
+      windows.set(key, stamps);
+      // Keep memory bounded: forget keys whose window has emptied.
+      if (windows.size > maxKeys) {
+        for (const [k, v] of windows) if (fresh(v, cutoff).length === 0) windows.delete(k);
+      }
+      return true;
+    },
+  };
+}
+
 /**
  * Turn Elasticsearch highlight text (wrapped in private marker characters,
  * never HTML) into segments the frontend renders as plain text and <mark>.
@@ -273,12 +330,15 @@ module.exports = {
   HttpError,
   MODES,
   badRequest,
+  createRateLimiter,
   findConflicts,
   keywordText,
   levelIntent,
   parseIds,
   parsePeopleParams,
   parseSearchParams,
+  parseSetlistBody,
+  parseSetlistId,
   toIcs,
   toSegments,
   whyReasons,

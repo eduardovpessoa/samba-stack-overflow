@@ -7,6 +7,9 @@ module.exports = {
   version: env.APP_VERSION || 'dev',
   team: env.TEAM_NAME || 'local',
   deployEnv: env.DEPLOY_ENV || 'local',
+  // How many reverse proxies sit in front of the app (the cluster gateway is
+  // one). Express uses it to read the visitor's address for rate limiting.
+  trustProxyHops: Number(env.TRUST_PROXY_HOPS || 1),
   // Shared secret for operator-only actions (the practice-incident switch).
   opsToken: env.OPS_TOKEN || '',
   conference: {

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
-import type { Meta, SearchMode, SearchResponse, SessionHit } from "../api";
+import type { Meta, SearchDiagnostics, SearchMode, SearchResponse, SessionHit } from "../api";
 import type { AsyncState } from "../lib/hooks";
 import { ENGINE_LABEL, MODE_LABEL, formatDay, formatTimeRange, plural } from "../lib/format";
 import { CheckIcon, ClockIcon, PinIcon, PlusIcon } from "./Icons";
@@ -47,6 +47,7 @@ export function Results(props: Props) {
             <span data-engine={state.data.engine}>{ENGINE_LABEL[state.data.engine]}</span>
             <span>{MODE_LABEL[state.data.mode]}</span>
             <span>{Math.round(state.data.tookMs)} ms</span>
+            <RoundTrips diagnostics={state.data.diagnostics} />
           </p>
         )}
       </header>
@@ -130,6 +131,20 @@ export function Results(props: Props) {
       )}
     </section>
   );
+}
+
+/**
+ * How many Elasticsearch requests this search needed. A healthy search takes
+ * the same few whatever the page size; the practice incident makes it one
+ * per result, and that is said in words, not only with colour.
+ */
+function RoundTrips({ diagnostics }: { diagnostics: SearchDiagnostics | undefined }) {
+  if (!diagnostics) return null;
+  const count = plural(diagnostics.roundTrips, "round trip", "round trips");
+  if (diagnostics.strategy === "sequential") {
+    return <strong className="tag tag--warn results__trips">{count} · practice incident</strong>;
+  }
+  return <span title="Elasticsearch requests needed for this search">{count}</span>;
 }
 
 function Welcome({ meta }: { meta: Meta | null }) {

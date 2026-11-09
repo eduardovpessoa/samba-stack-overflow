@@ -8,16 +8,18 @@ import {
   type AgendaResponse,
   type ChaosMode,
   type Meta,
+  type SearchDiagnostics,
   type SearchMode,
   type SearchResponse,
   type Session,
+  type SharedSetlist,
 } from "./api";
 import { Ask } from "./components/Ask";
 import { Header, Ops, SetlistBar, type TextScale, type Theme } from "./components/Chrome";
 import { Results } from "./components/Results";
 import { EMPTY_FILTERS, MAX_QUERY_LENGTH, SearchHero, hasActiveFilters, type Filters } from "./components/SearchHero";
 import { SessionSheet } from "./components/SessionSheet";
-import { Setlist } from "./components/Setlist";
+import { Setlist, SharedSetlistPanel } from "./components/Setlist";
 import { Roda } from "./components/Roda";
 import { Calcada } from "./components/Shared";
 import { timeZoneAbbreviation } from "./lib/format";
@@ -38,6 +40,16 @@ function readQueryFromUrl(): string {
     return (new URLSearchParams(window.location.search).get("q") ?? "").slice(0, MAX_QUERY_LENGTH);
   } catch {
     return "";
+  }
+}
+
+/** The id of a shared setlist in the page URL (`/?setlist=<id>`), if it looks like one. */
+function readSharedIdFromUrl(): string | null {
+  try {
+    const id = new URLSearchParams(window.location.search).get("setlist") ?? "";
+    return /^[A-Za-z0-9_-]{1,64}$/.test(id) ? id : null;
+  } catch {
+    return null;
   }
 }
 
@@ -101,6 +113,10 @@ export function App() {
   const [searchAttempt, setSearchAttempt] = useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const sessionCache = useRef(new Map<string, Session>());
+  // How the most recent search was answered, kept for the Ops drawer.
+  const [lastDiagnostics, setLastDiagnostics] = useState<SearchDiagnostics | null>(null);
+  // A setlist opened from a shared link. It stays in the URL until dealt with.
+  const [sharedId, setSharedId] = useState<string | null>(readSharedIdFromUrl);
 
   // Only offer modes the engine really has. A stored "hybrid" falls back to
   // the first honest mode when meaning search is missing.
@@ -131,6 +147,7 @@ export function App() {
       .then((data) => {
         rememberSessions(data.results);
         setSearch({ status: "ready", data });
+        setLastDiagnostics(data.diagnostics ?? null);
       })
       .catch((error: unknown) => {
         if (isAbort(error)) return;
@@ -139,12 +156,16 @@ export function App() {
     return () => controller.abort();
   }, [query, mode, filters, metaSettled, searchAttempt, rememberSessions]);
 
-  // Keep ?q= in step so a search can be shared as a link.
+  // Keep ?q= in step so a search can be shared as a link. A shared setlist
+  // id stays in the URL until the person adds or dismisses it.
   useEffect(() => {
     const q = query.trim();
-    const url = q ? `${window.location.pathname}?q=${encodeURIComponent(q)}${window.location.hash}` : `${window.location.pathname}${window.location.hash}`;
-    window.history.replaceState(null, "", url);
-  }, [query]);
+    const parts: string[] = [];
+    if (q) parts.push(`q=${encodeURIComponent(q)}`);
+    if (sharedId) parts.push(`setlist=${encodeURIComponent(sharedId)}`);
+    const qs = parts.length > 0 ? `?${parts.join("&")}` : "";
+    window.history.replaceState(null, "", `${window.location.pathname}${qs}${window.location.hash}`);
+  }, [query, sharedId]);
 
   const submit = useCallback((value: string) => {
     const next = value.trim().slice(0, MAX_QUERY_LENGTH);
@@ -226,6 +247,54 @@ export function App() {
     [rememberSessions, setAgendaIds],
   );
 
+  // --- Shared setlist (opened from a link) --------------------------------
+  const [shared, setShared] = useState<AsyncState<SharedSetlist>>({ status: "idle" });
+  const [sharedAttempt, setSharedAttempt] = useState(0);
+  const [sharedNote, setSharedNote] = useState("");
+
+  useEffect(() => {
+    if (sharedId === null) {
+      setShared({ status: "idle" });
+      return;
+    }
+    const controller = new AbortController();
+    setShared({ status: "loading", previous: null });
+    api
+      .setlist(sharedId, controller.signal)
+      .then((data) => {
+        rememberSessions(data.items);
+        setShared({ status: "ready", data });
+      })
+      .catch((error: unknown) => {
+        if (isAbort(error)) return;
+        setShared({ status: "error", message: describeError(error), code: error instanceof ApiError ? error.code : "internal" });
+      });
+    return () => controller.abort();
+  }, [sharedId, sharedAttempt, rememberSessions]);
+
+  const addShared = useCallback(
+    (items: Session[]) => {
+      rememberSessions(items);
+      // Say how many were new: some may already be in the setlist.
+      const fresh = items.filter((item) => !agendaIds.includes(item.id)).length;
+      setAgendaIds((ids) => [...new Set([...ids, ...items.map((item) => item.id)])].slice(-MAX_AGENDA));
+      setSharedNote(
+        fresh === 0
+          ? "Those talks were already in your setlist."
+          : `Added ${fresh === 1 ? "1 talk" : `${fresh} talks`} to your setlist.`,
+      );
+      setSharedId(null);
+      // The panel is gone: put focus where the talks landed.
+      requestAnimationFrame(() => document.getElementById("setlist-title")?.focus());
+    },
+    [agendaIds, rememberSessions, setAgendaIds],
+  );
+
+  const dismissShared = useCallback(() => {
+    setSharedId(null);
+    requestAnimationFrame(() => document.getElementById("main")?.focus());
+  }, []);
+
   // --- Details sheet ------------------------------------------------------
   const [detailId, setDetailId] = useState<string | null>(null);
 
@@ -258,7 +327,7 @@ export function App() {
         onTheme={setTheme}
       />
 
-      <main id="main">
+      <main id="main" tabIndex={-1}>
         <SearchHero
           draft={draft}
           onDraftChange={setDraft}
@@ -294,6 +363,17 @@ export function App() {
           </div>
         )}
 
+        <SharedSetlistPanel
+          state={shared}
+          timeZone={timeZone}
+          onAddAll={addShared}
+          onDismiss={dismissShared}
+          onRetry={() => setSharedAttempt((n) => n + 1)}
+        />
+        <p className="visually-hidden" role="status" aria-live="polite">
+          {sharedNote}
+        </p>
+
         <div className="layout">
           <Results
             state={search}
@@ -321,6 +401,7 @@ export function App() {
             onOpen={setDetailId}
             onClear={() => setAgendaIds([])}
             onRetry={() => setAgendaAttempt((n) => n + 1)}
+            onAdd={toggleAgenda}
           />
         </div>
 
@@ -339,7 +420,7 @@ export function App() {
             {tzNote && <p>{tzNote}</p>}
             <p>An independent hackathon project. Not affiliated with Stack Overflow.</p>
           </div>
-          {metaData && <Ops meta={metaData} onChaosChange={onChaosChange} />}
+          {metaData && <Ops meta={metaData} onChaosChange={onChaosChange} diagnostics={lastDiagnostics} />}
         </div>
       </footer>
 

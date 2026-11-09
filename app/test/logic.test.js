@@ -6,6 +6,7 @@ const {
   HL_CLOSE,
   HL_OPEN,
   HttpError,
+  createRateLimiter,
   findConflicts,
   keywordText,
   levelIntent,
@@ -66,6 +67,28 @@ test('parseIds accepts lists and comma strings, rejects odd characters', () => {
   assert.throws(() => parseIds('s-a;drop'), HttpError);
   assert.throws(() => parseIds([42]), HttpError);
   assert.throws(() => parseIds(['a', 'b', 'c'], 2), HttpError);
+});
+
+test('createRateLimiter allows a burst, refuses the next, then recovers', () => {
+  let t = 0;
+  const limiter = createRateLimiter({ limit: 2, windowMs: 1000, now: () => t });
+  assert.equal(limiter.take(), true);
+  assert.equal(limiter.take(), true);
+  assert.equal(limiter.take(), false);
+  t = 1001;
+  assert.equal(limiter.take(), true);
+});
+
+test('createRateLimiter keeps a separate window per key', () => {
+  let t = 0;
+  const limiter = createRateLimiter({ limit: 1, windowMs: 1000, now: () => t });
+  assert.equal(limiter.take('a'), true);
+  assert.equal(limiter.allows('a'), false);
+  assert.equal(limiter.take('a'), false);
+  assert.equal(limiter.allows('b'), true);
+  assert.equal(limiter.take('b'), true);
+  t = 1001;
+  assert.equal(limiter.allows('a'), true);
 });
 
 test('toSegments converts marker characters and never emits HTML', () => {

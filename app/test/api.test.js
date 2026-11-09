@@ -111,6 +111,118 @@ test('agenda rejects a malformed body', async () => {
   assert.equal(res.status, 400);
 });
 
+test('search says how it was answered', async () => {
+  const body = await (await get('/api/search?q=kubernetes&size=3')).json();
+  assert.equal(typeof body.diagnostics.roundTrips, 'number');
+  assert.equal(body.diagnostics.strategy, 'batched');
+  assert.equal(typeof body.diagnostics.servedBy, 'string');
+  assert.ok(body.diagnostics.traceId === null || /^[0-9a-f]{32}$/.test(body.diagnostics.traceId));
+});
+
+test('free-time suggestions never clash with the picked sessions', async () => {
+  const picked = sessions.filter((s) => s.day === sessions[0].day).slice(1, 4);
+  const res = await post('/api/agenda/suggest', { ids: picked.map((s) => s.id) });
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.basedOn, picked.length);
+  assert.ok(body.results.length > 0 && body.results.length <= 4);
+  for (const s of body.results) {
+    assert.ok(!picked.some((p) => p.id === s.id), 'never suggests what is already picked');
+    for (const p of picked) {
+      const clash = Date.parse(s.start) < Date.parse(p.end) && Date.parse(p.start) < Date.parse(s.end);
+      assert.equal(clash, false, `${s.id} overlaps ${p.id}`);
+    }
+  }
+});
+
+test('suggestions need at least one talk and tolerate unknown ids', async () => {
+  assert.equal((await post('/api/agenda/suggest', { ids: [] })).status, 400);
+  assert.equal((await post('/api/agenda/suggest', {})).status, 400);
+  const body = await (await post('/api/agenda/suggest', { ids: ['s-does-not-exist'] })).json();
+  assert.deepEqual(body, { basedOn: 0, results: [] });
+});
+
+test('a setlist can be saved and opened by its id', async () => {
+  const ids = [sessions[3].id, sessions[1].id, 's-does-not-exist'];
+  const created = await post('/api/setlists', { ids, name: '  My   Tuesday\u0007 plan ' });
+  assert.equal(created.status, 201);
+  const { id, count } = await created.json();
+  assert.match(id, /^[A-Za-z0-9_-]{8,24}$/);
+  assert.equal(count, 2, 'unknown ids are dropped');
+
+  const opened = await get(`/api/setlists/${id}`);
+  assert.equal(opened.status, 200);
+  const body = await opened.json();
+  assert.equal(body.id, id);
+  assert.equal(body.name, 'My Tuesday plan');
+  assert.match(body.createdAt, /^\d{4}-\d{2}-\d{2}T/);
+  assert.deepEqual(body.items.map((s) => s.id).sort(), [sessions[1].id, sessions[3].id].sort());
+  assert.ok(Array.isArray(body.conflicts));
+});
+
+test('setlists reject bad input and unknown ids are 404s', async () => {
+  for (const body of [{}, { ids: [] }, { ids: ['s-does-not-exist'] }, { ids: [sessions[0].id], name: 'x'.repeat(61) }, { ids: [sessions[0].id], name: 7 }]) {
+    assert.equal((await post('/api/setlists', body)).status, 400, JSON.stringify(body).slice(0, 60));
+  }
+  for (const path of ['/api/setlists/AAAAAAAAAAAA', '/api/setlists/nope', '/api/setlists/..%2F..%2Fetc']) {
+    const res = await get(path);
+    assert.equal(res.status, 404, path);
+    assert.equal((await res.json()).error.code, 'not_found');
+  }
+});
+
+test('saving setlists is limited per visitor, so one client cannot block the rest', async () => {
+  let clock = 1_000_000;
+  const app = createApp({ store: createOfflineStore({ sessions, people }), opsToken: '', deployEnv: 'local', now: () => clock });
+  const srv = await new Promise((resolve) => {
+    const s = app.listen(0, () => resolve(s));
+  });
+  // The app trusts one proxy hop, so X-Forwarded-For stands in for the visitor's address.
+  const save = (client, ids = [sessions[0].id]) =>
+    fetch(`http://127.0.0.1:${srv.address().port}/api/setlists`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-forwarded-for': client },
+      body: JSON.stringify({ ids }),
+    });
+  try {
+    for (let i = 0; i < 6; i += 1) assert.equal((await save('203.0.113.7')).status, 201, `save ${i + 1}`);
+    const refused = await save('203.0.113.7');
+    assert.equal(refused.status, 429);
+    assert.equal(refused.headers.get('retry-after'), '30');
+    assert.equal((await refused.json()).error.code, 'rate_limited');
+
+    assert.equal((await save('203.0.113.8')).status, 201, 'another visitor is not affected');
+
+    // Requests that save nothing do not spend the budget.
+    for (let i = 0; i < 10; i += 1) assert.equal((await save('203.0.113.9', ['s-does-not-exist'])).status, 400);
+    assert.equal((await save('203.0.113.9')).status, 201, 'invalid saves cost nothing');
+
+    clock += 61_000;
+    assert.equal((await save('203.0.113.7')).status, 201, 'the window slides');
+  } finally {
+    await new Promise((resolve) => srv.close(resolve));
+  }
+});
+
+test('the pod-wide cap is a backstop behind the per-visitor limit', async () => {
+  const app = createApp({ store: createOfflineStore({ sessions, people }), opsToken: '', deployEnv: 'local', now: () => 5_000_000 });
+  const srv = await new Promise((resolve) => {
+    const s = app.listen(0, () => resolve(s));
+  });
+  const save = (client) =>
+    fetch(`http://127.0.0.1:${srv.address().port}/api/setlists`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-forwarded-for': client },
+      body: JSON.stringify({ ids: [sessions[0].id] }),
+    });
+  try {
+    for (let i = 0; i < 30; i += 1) assert.equal((await save(`198.51.100.${i}`)).status, 201, `visitor ${i}`);
+    assert.equal((await save('198.51.100.200')).status, 429, 'a new visitor is refused once the pod cap is reached');
+  } finally {
+    await new Promise((resolve) => srv.close(resolve));
+  }
+});
+
 test('calendar export is an ics download', async () => {
   const res = await get(`/api/agenda.ics?ids=${sessions[0].id}`);
   assert.equal(res.status, 200);

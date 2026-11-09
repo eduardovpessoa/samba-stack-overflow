@@ -16,9 +16,10 @@ Every non-2xx JSON response has this shape:
 ```
 
 Codes: `bad_request` (400), `forbidden` (403), `not_found` (404),
-`ask_unavailable` (503), `search_unavailable` (503), `internal` (500).
+`rate_limited` (429), `ask_unavailable` (503), `search_unavailable` (503),
+`internal` (500).
 
-Every 503 carries a `Retry-After` header in seconds. A 503 is short-lived
+Every 503 and 429 carries a `Retry-After` header in seconds. A 503 is short-lived
 (the index is warming up after a restart, or a dependency hiccuped), so
 clients should retry once after that delay before showing an error.
 
@@ -112,6 +113,14 @@ sessions where each one is `yes`), `size` (1 to 30, default 12).
   tookMs: number;                            // whole request, server side
   total: number;
   results: SessionHit[];
+  // How this answer was produced. Shown to people on purpose: a search should
+  // take the same few round trips whatever the page size.
+  diagnostics: {
+    roundTrips: number;                      // Elasticsearch requests for this search
+    strategy: "batched" | "sequential";      // sequential = the practice incident
+    traceId: string | null;                  // OpenTelemetry trace id, to look it up in Dash0
+    servedBy: string;                        // pod name (or host name locally)
+  };
 }
 ```
 
@@ -127,6 +136,46 @@ Body `{ "ids": string[] }` (max 60). Unknown ids are ignored.
   conflicts: { a: string; b: string; overlapMinutes: number }[];
 }
 ```
+
+### `POST /api/agenda/suggest`
+Body `{ "ids": string[] }` (1 to 60): the sessions already in the setlist.
+Returns up to 4 sessions that **do not overlap any of them in time**, ranked
+by how close they are in meaning to what was picked. One Elasticsearch
+query does both: a semantic query for the ranking and date-range filters for
+the free time. Unknown ids are ignored; if none is known the list is empty.
+
+```ts
+{
+  basedOn: number;                           // how many picked sessions were used
+  results: Session[];
+}
+```
+
+### `POST /api/setlists`
+Saves a setlist in Elasticsearch so it can be shared. Body
+`{ "ids": string[], "name"?: string }` (1 to 60 known ids, name up to 60
+characters, plain text). Unknown ids are dropped; `400` if none is known.
+Limited to 6 saves per minute per visitor, with a cap of 30 per minute per
+server behind it: beyond either, `429 rate_limited`. Only a save that
+succeeds counts.
+
+`201 { "id": string, "count": number }`. A saved setlist never changes:
+sharing again creates a new one.
+
+### `GET /api/setlists/:id`
+
+```ts
+{
+  id: string;
+  name: string;                              // "" when none was given
+  createdAt: string;                         // ISO 8601, UTC
+  items: Session[];                          // sorted by start
+  conflicts: { a: string; b: string; overlapMinutes: number }[];
+}
+```
+
+`404 not_found` when there is no such setlist. The frontend opens a shared
+setlist from the page URL `/?setlist=<id>`.
 
 ### `GET /api/agenda.ics?ids=a,b,c`
 `text/calendar` download of the chosen sessions.

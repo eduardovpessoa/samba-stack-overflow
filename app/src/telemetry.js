@@ -30,6 +30,12 @@ const instruments = {
   agendaConflicts: meter.createCounter('samba.agenda.conflicts', {
     description: 'Schedule conflicts found while planning agendas.',
   }),
+  setlistsSaved: meter.createCounter('samba.setlists.saved', {
+    description: 'Setlists saved for sharing.',
+  }),
+  suggestions: meter.createCounter('samba.agenda.suggestions', {
+    description: 'Free-time suggestion requests, by whether anything was found.',
+  }),
   askDuration: meter.createHistogram('samba.ask.duration', {
     unit: 'ms',
     description: 'Duration of grounded answers, including retrieval and the model call.',

@@ -1,140 +1,225 @@
-# Three-minute demo
+# The demo script
 
-One story, not four product tours: **a talk finder, and the afternoon it took
-to make it trustworthy.**
+**Samba Stack Overflow: find your talk, find your people.**
 
-Open these tabs before you start recording:
+This is a script you can read out loud. Lines marked **Say** are yours to
+speak; lines marked **Do** are what to click. It runs about three and a half
+minutes. Parts marked *(optional)* can go if you are short on time.
 
-| Tab | What to open |
+The story in one sentence: *I built a conference app in an afternoon, and
+four tools kept me honest while I did it.*
+
+## Before you hit record
+
+Open these tabs, in this order:
+
+| # | Tab | Where |
+|---|---|---|
+| 1 | The app | https://samba-stack-overflow.cnh.radarhq.io |
+| 2 | Dash0 | Dashboards > "Samba Stack Overflow: search health" |
+| 3 | Radar | https://app.radarhq.io > cluster `samba-stack-overflow` > Timeline |
+| 4 | Radar | AI investigations > the run on Deployment `app` |
+| 5 | Radar | Checks, with Namespace set to `team-samba-stack-overflow` |
+| 6 | GitHub | https://github.com/eduardovpessoa/samba-stack-overflow/pulls?q=is%3Apr |
+
+And have ready:
+
+- The **ops token**: the `OPS_TOKEN` line in `.env.local`. Copy it before
+  recording so it is never on screen.
+- Your **phone**, with the app open, if you want to show it installed.
+- A clean setlist: open the app and remove any talks left from testing.
+
+## Scene 1. Hello (20 seconds)
+
+**Say:**
+> "Conferences are full of great talks, and somehow you still miss the one
+> you came for. This is Samba Stack Overflow. It finds your talk and your
+> people, and it shows its work. I'm Brazilian, so your agenda is a
+> *setlist*, and your people are a *roda*: the circle where samba happens.
+> In a roda nobody is the audience. Everybody is in the band."
+
+## Scene 2. Find the talk (60 seconds)
+
+**Do:** type *How do I stop getting woken up at 3am by useless pages?* and
+press **Bora!** ("let's go").
+
+**Say:**
+> "I asked like a tired human, not like a search engine. The top result is
+> 'From Alert Fatigue to Signal'. None of my words are in that title.
+> Elasticsearch ran two searches at once: one that reads my words, and one
+> that understands what I mean. Then it blended the two rankings. See these
+> chips? Keyword number one, Meaning number one. They agree."
+
+**Do:** type *People who cannot hear should still be able to follow my
+presentation*.
+
+**Say:**
+> "Now they disagree. Keywords alone would put this talk fifth. Meaning puts
+> it first: 'Sign Language Interpreters and You'. And every card tells you
+> why it matched, in plain words. No magic, no trust me."
+
+**Do:** tick **Captions** and **Step-free access**.
+
+**Say:**
+> "These filters only show talks where the organisers confirmed it. When
+> they have not said, the app says 'Not published'. It never guesses. If you
+> use a wheelchair, a guess is worse than no answer."
+
+**Do:** add two or three talks to the setlist, then press **Fill my free
+time**.
+
+**Say:**
+> "This is my favourite part. One question to Elasticsearch: find talks like
+> the ones I picked, *and* only at times when I am free. The meaning search
+> does the ranking, date ranges do the calendar. One query, zero clashes."
+
+**Do:** press **Share setlist** and paste the link into a new tab (or open
+it on your phone).
+
+**Say:**
+> "My setlist is now saved in Elasticsearch, and this link opens it
+> anywhere. Send it to the friend who always asks 'what are you going to?'"
+
+*(optional)* **Do:** open **Roda** and paste *I'm building an AI-powered
+healthcare scheduling platform using Go, Kubernetes, and PostgreSQL.*
+
+**Say:**
+> "And this finds people building things like mine. These are demo profiles,
+> clearly labelled. I did not invent real attendees."
+
+## Scene 3. Break it on purpose (45 seconds)
+
+**Do:** point at the line under the result count: *Elasticsearch · Hybrid ·
+4 round trips*.
+
+**Say:**
+> "Every search tells you how much work it took: four trips to
+> Elasticsearch. Now watch me break it."
+
+**Do:** open **Ops** in the footer, paste the ops token, switch on the
+practice incident, and search again.
+
+**Say:**
+> "Fifteen round trips. This is a classic bug called N plus one. Imagine
+> ordering coffee for fifteen people by walking to the counter fifteen
+> times. The app still works, it is only a little slower here, about 390 to
+> 560 milliseconds. On bad wifi it was three times slower. That is why I
+> count the trips and not only the seconds: you can see the bug before your
+> users feel it."
+
+**Do:** switch to the Dash0 dashboard and point at the round trips panel.
+
+**Say:**
+> "Dash0 sees the same jump, from every pod. I asked its AI, Agent0, what
+> was going on. It compared a slow search with a fast one and found the
+> extra calls, with trace IDs. It also found something I had not asked
+> about: two requests that failed because they arrived a fifth of a second
+> before the app was ready. That was a real gap. Now the app tells you when
+> to retry, and retries by itself. And there is an alert on this number, so
+> the bug cannot come back quietly."
+
+**Do:** switch the incident off.
+
+## Scene 4. Ask the cluster (40 seconds)
+
+**Do:** show the Radar Timeline.
+
+**Say:**
+> "The app runs on Kubernetes. Every time I merge, GitHub builds it and Argo
+> CD rolls it out, healthy in about thirty seconds each time. I read all of
+> this from my coding agent, through Radar."
+
+**Do:** open the AI investigation.
+
+**Say:**
+> "I asked Radar's AI to check my first release. Verdict: healthy. But it
+> spotted a warning on a perfectly healthy start. So I asked a follow-up:
+> which of your findings actually matter for an app this size? It told me
+> which two were real risks and which one could wait."
+
+**Do:** show the Checks page next to `docs/evidence/radar-checks-before-1.png`.
+
+**Say:**
+> "Three findings on my app before. Zero now."
+
+*(optional)* **Say:**
+> "The best part: after the fix, Radar showed one *new* warning. Radar gave
+> me the symptom. Dash0 gave me the cause: the first connection from a new
+> pod took 2.7 seconds. Two tools, one answer, one line of fix."
+
+## Scene 5. Never merge broken (30 seconds)
+
+**Do:** open pull request #1 on GitHub.
+
+**Say:**
+> "Nothing reached this cluster without a pull request, and Gitar reviewed
+> every one against rules I wrote for this project. On the first one it
+> found a security hole: my 'break it' switch was open to the whole
+> internet. Fixed. It found an accessibility bug and pushed that fix itself."
+
+**Do:** open pull request #2.
+
+**Say:**
+> "It even reviewed this script. I had written two numbers that could not
+> both be true, and it called me out. I have been fact-checked by my own
+> code reviewer."
+
+## Scene 6. Goodbye (15 seconds)
+
+*(optional)* **Do:** hold up your phone with the app installed.
+
+**Say:**
+> "It installs on your phone like an app, and it can remind you ten minutes
+> before a talk. Better discovery, honest accessibility information, real
+> connections, and the engineering to keep it standing. Samba Stack
+> Overflow. *Obrigado!*"
+
+## If a judge asks
+
+| Question | Honest answer |
 |---|---|
-| App | https://samba-stack-overflow.cnh.radarhq.io |
-| Dash0 | Dashboards > "Samba Stack Overflow: search health" |
-| Radar, timeline | https://app.radarhq.io > cluster `samba-stack-overflow` > Timeline |
-| Radar, investigation | AI investigations > the run on Deployment `app` |
-| Radar, Checks | Checks, with Namespace set to `team-samba-stack-overflow` |
-| GitHub | https://github.com/eduardovpessoa/samba-stack-overflow/pulls?q=is%3Apr |
-| Reports | `docs/investigations/` (one for Dash0, one for Radar) and `docs/evidence/` |
+| Is the schedule real? | No. It is an openly labelled demo dataset of 42 talks and 18 profiles. The search, the cluster and the telemetry are all real. |
+| Where is the data stored? | Everything is in Elasticsearch: talks, profiles, shared setlists and the incident switch. There is no other database. |
+| What does "hybrid" mean? | Two searches per question, a keyword one and a semantic one on Jina embeddings, fused by Elasticsearch with reciprocal rank fusion. |
+| Is the incident fake? | The switch is on purpose, the slowdown is real: the code makes one Elasticsearch call per result instead of one for all. It turns itself off after ten minutes and needs a token. |
+| Are the notifications push? | No. They are reminders the app schedules itself, so they work while it is open or recently in the background. Push to a closed app would need a push server. |
+| Does "Ask" work? | The code is there, but it is switched off: no language model key is configured on the cluster. |
+| What did the AI tools actually change? | Gitar: a security fix and an accessibility fix on PR #1, a wrong number in this script on PR #2. Dash0 Agent0: retry hints on 503s. Radar: three hardening fixes and a probe delay, PRs #3 and #4. |
 
-The pull requests, in the order they tell the story:
+## The pull requests, in story order
 
 | PR | What it shows |
 |---|---|
-| [#1](https://github.com/eduardovpessoa/samba-stack-overflow/pull/1) | The product. Gitar found a security hole and an accessibility bug; one fixed by hand, one by a commit Gitar pushed. |
-| [#2](https://github.com/eduardovpessoa/samba-stack-overflow/pull/2) | This script. Gitar caught two numbers in it that contradicted each other. |
-| [#3](https://github.com/eduardovpessoa/samba-stack-overflow/pull/3) | Radar's Checks findings fixed. Checks went from 3 to 0. |
-| [#4](https://github.com/eduardovpessoa/samba-stack-overflow/pull/4) | Probe timing set from a Dash0 measurement, after Radar showed the warning. |
+| [#1](https://github.com/eduardovpessoa/samba-stack-overflow/pull/1) | The product. Gitar found a security hole and an accessibility bug. |
+| [#2](https://github.com/eduardovpessoa/samba-stack-overflow/pull/2) | This script. Gitar caught two numbers that contradicted each other. |
+| [#3](https://github.com/eduardovpessoa/samba-stack-overflow/pull/3) | Radar's findings fixed. Checks went from 3 to 0. |
+| [#4](https://github.com/eduardovpessoa/samba-stack-overflow/pull/4) | Probe timing, set from a Dash0 measurement after Radar showed the warning. |
+| [#5](https://github.com/eduardovpessoa/samba-stack-overflow/pull/5) | The before and after of three releases, written down. |
 
-## 0:00 Opening (20 s)
+The long versions, with times, numbers and the AI tools' own words, are in
+`docs/investigations/`.
 
-> "Conference days are full of great talks, and you still miss the one you
-> came for. Samba Stack Overflow finds your talk and your people, and shows
-> its work. I'm Brazilian, so your agenda is a setlist and your people are a
-> roda, the circle where samba happens."
+## If something breaks while recording
 
-## 0:20 The product, on Elasticsearch (55 s)
-
-1. Type: *"How do I stop getting woken up at 3am by useless pages?"*
-   The top result is **"From Alert Fatigue to Signal"**, chips **Keyword #1,
-   Meaning #1**. "None of my words are in that title. Elasticsearch ran a
-   keyword query and a semantic query on Jina embeddings and fused them with
-   reciprocal rank fusion. Both agree here, and the card says why."
-2. Type: *"People who cannot hear should still be able to follow my
-   presentation"*. The top result is **"Sign Language Interpreters and
-   You"**, chips **Meaning #1, Keyword #5**. "Keywords alone would have put
-   this fifth. Meaning put it first."
-3. Click the chip *"I'm a backend dev, new to eBPF"*. "It read 'new to' and
-   lifted the beginner sessions."
-4. Tick **Captions** and **Step-free access**. "Only talks where the
-   organisers confirmed it. Unknown says 'Not published'. We never guess."
-5. Add two overlapping talks. The **Setlist** flags the clash. "Add to
-   calendar" exports it.
-6. Open **Roda**, paste *"I'm building an AI-powered healthcare scheduling
-   platform using Go, Kubernetes, and PostgreSQL."* "Vector search over demo
-   profiles, labelled as demo."
-
-## 1:15 Observability, with Dash0 (40 s)
-
-1. Open the **Ops** drawer in the footer, paste the ops token (`OPS_TOKEN` in
-   `.env.local`) and switch on the practice incident. Search three times.
-2. Dash0 dashboard: the **Elasticsearch round trips** panel jumps from 4 to
-   15. Be honest about latency: inside the cluster each extra round trip
-   costs about 15 ms, so the same search goes from about 390 ms to about
-   560 ms (11 extra round trips). From a slow network the same bug tripled
-   it (0.85 s to 2.5 s). "That is why we chart round trips and not only
-   latency: the bug is there before users feel it."
-3. Show `docs/investigations/2026-11-09-dash0-agent0-slow-search.md`.
-   "I asked Agent0 through Dash0's MCP server. It compared a slow and a fast
-   trace of the same query and found 12 sequential Elasticsearch calls where
-   there should be one: 1.87 s against 0.16 s. It also explained two failed
-   requests I had not asked about in detail: they hit the service 0.2 s
-   before its index was ready. That one was a real gap, and the fix shipped:
-   every 503 now says when to retry, and the app retries by itself."
-4. Switch the incident off. The panel drops back.
-
-## 1:55 Kubernetes, with Radar (35 s)
-
-Open tabs: Radar Cloud > **Timeline** (namespace
-`team-samba-stack-overflow`), **AI investigations**, and **Checks**. The
-full write-up with times and quotes is
-`docs/investigations/2026-11-09-radar-first-release.md`.
-
-1. **Timeline.** "Every push to main is built by GitHub Actions and rolled
-   out by Argo CD. Here is the first release: the Application showed a
-   ComparisonError because I created it before the code was merged, the
-   merge cleared it, and 24 seconds after the sync both new pods were
-   healthy. I read all of this through Radar's MCP server from my coding
-   agent."
-2. **AI investigation** on Deployment `app`. "I asked Radar's AI SRE to
-   check the release. Verdict: healthy, certainty established. It still
-   found something: a 'startup probe failed, connection refused' warning on
-   a perfectly healthy start."
-3. **The follow-up.** "I asked which of Radar's Checks findings actually
-   matter for a two-replica web app. Its answer: the unused Kubernetes API
-   token and the missing PodDisruptionBudget are real risks, the missing
-   topology spread is a latent one, and the probe warning goes away with an
-   initial delay."
-4. **Checks, before and after.** Show `docs/evidence/radar-checks-before-1.png`
-   next to the live Checks page with Namespace set to
-   `team-samba-stack-overflow`. "Three findings on our Deployment before,
-   zero now. The fixes went through pull request #3: Gitar reviewed it, Argo
-   CD rolled it out in 32 seconds, and Radar shows the result."
-5. **If you have ten more seconds, the best part.** "The after-check showed
-   one new warning: readiness probe failed, 503. Radar gave me the symptom.
-   Dash0's trace gave me the cause: the first connection from each new pod
-   to Elasticsearch took 2.7 seconds, so warm-up ran past the probe. Two
-   tools, one answer, and a one-line fix in pull request #4. The rollout
-   after it logged no warnings at all."
-
-## 2:30 Code quality, with Gitar (20 s)
-
-1. Open the pull request. "Every feature landed through a pull request that
-   Gitar reviewed against this project's own rules: the API contract, no
-   Elasticsearch call inside a loop, never invent accessibility data."
-2. Show the two findings on pull request #1 and how each was closed:
-   - **Security:** `POST /api/chaos` was open on a public URL, so anyone
-     could keep the N+1 regression switched on. Fixed in `785f9be`: the
-     switch now needs an ops token from the cluster Secret.
-   - **Bug:** the Ask prompt passed only two of the four accessibility
-     fields to the model, so it would guess or say "not published" wrongly.
-     Gitar pushed that fix itself in `6d0d4c8` when asked.
-3. Point at the labels (`area:search`, `area:deploy`, ...) and the deploy
-   reminder comment: both come from this repo's own rules in `.gitar/rules/`.
-4. A good closing line for this part, from pull request #2: "It even
-   reviewed this demo script. I had written '14 milliseconds per round trip'
-   next to '500 to 560 milliseconds', and it pointed out those cannot both
-   be true. It was right: I had compared two different sets of queries."
-
-## 2:50 Close (10 s)
-
-> "Better discovery, honest accessibility information, real connections, and
-> the engineering to keep it standing. Samba Stack Overflow. Obrigado!"
-
-## If something breaks on stage
-
-- Search is slow or down: say so, and open the Dash0 dashboard. It is the
+- Search is slow or down: say so and open the Dash0 dashboard. That is the
   point of the demo.
-- The cluster URL is unreachable: run it locally (`README.md`, "Run it
-  locally") and continue from step 0:20.
+- The live site is unreachable: run it locally (`README.md`, "Run it
+  locally") and carry on from Scene 2.
+- A number on screen differs from this script: read the screen, not the
+  script.
+
+## Words, in plain language
+
+- **Hybrid search**: asking the same question two ways, by exact words and
+  by meaning, and blending the answers.
+- **Embedding**: a list of numbers that stands for the meaning of a text, so
+  similar ideas end up close together.
+- **Round trip**: one request from the app to Elasticsearch and back.
+- **N+1**: doing one request per item instead of one request for all items.
+- **Pod**: one running copy of the app. There are two, on two machines.
+- **Rollout**: replacing the old copies with new ones, one at a time.
+- **Trace**: the recorded path of one request through the system.
+- **Setlist**: your personal agenda. **Roda**: the people-finder.
 
 ## What is true today
 
@@ -142,10 +227,10 @@ Only claim what is ticked.
 
 - [x] Elasticsearch: real index, hybrid search, semantic highlights, facets,
       people matching
-- [x] Dash0: traces, metrics and logs received; dashboard created; Agent0
-      investigation through MCP with a shipped fix
-- [x] Dash0: telemetry from both cluster pods, with pod and namespace names
-- [x] Dash0: browser monitoring from the deployed site (page views, LCP, CLS)
+- [x] Dash0: traces, metrics and logs from both cluster pods; browser
+      monitoring from the deployed site
+- [x] Dash0: dashboard and an alert rule on round trips, both kept in git
+- [x] Dash0: Agent0 investigation through MCP, with a shipped fix
 - [x] Dash0: practice incident on the cluster shows 4 round trips becoming 15
 - [x] Radar: app deployed in the team cluster through Argo CD (two pods on
       two nodes, live at the public URL)
@@ -153,10 +238,8 @@ Only claim what is ticked.
       server while shipping
 - [x] Radar: hosted AI investigation on Deployment `app` (healthy, certainty
       established), with a follow-up that ranked the Checks findings
-- [x] Radar: Checks findings in our namespace went from 3 to 0 after pull
-      request #3
+- [x] Radar: Checks findings in our namespace went from 3 to 0
 - [x] Radar and Dash0 together: a readiness warning seen in Radar, explained
       by a Dash0 trace, fixed in pull request #4; the next rollout was clean
-- [x] Gitar: pull request #1 reviewed against the project's rules; two real
-      findings, one fixed by hand and one by a commit Gitar pushed; area
-      labels and the deploy reminder applied by repository rules
+- [x] Gitar: every change landed through a reviewed pull request; real
+      findings on #1 and #2, one fixed by a commit Gitar pushed

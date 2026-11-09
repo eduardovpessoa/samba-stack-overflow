@@ -19,7 +19,15 @@ Live: https://samba-stack-overflow.cnh.radarhq.io
   should I attend?" works as well as `ebpf`.
 - **See why it matched.** Every result shows its rank in the keyword search
   and in the meaning search, the passage that matched, and plain reasons.
-- **Setlist.** Pick talks, see time clashes, export to your calendar.
+- **Setlist.** Pick talks, see time clashes, export to your calendar, and
+  share it: a shared setlist is saved in Elasticsearch and opens from a link.
+- **Fill my free time.** One Elasticsearch query ranks talks by how close
+  they are to what you picked and filters out everything that would clash.
+- **Search you can see into.** Every search shows how many Elasticsearch
+  round trips it took and which pod answered.
+- **Installs like an app.** Add it to your phone's home screen. It can remind
+  you ten minutes before a talk while it is open or recently in the
+  background (local reminders, not push).
 - **Accessibility first.** Filter by captions, step-free access, sign
   language and low-sensory rooms. Anything the organisers have not published
   is shown as "Not published", never guessed.
@@ -43,7 +51,7 @@ The schedule and the people are an openly labelled **demo dataset**.
 | | What it does here |
 |---|---|
 | **Elasticsearch** | The only data store. Sessions and profiles are indexed with a `semantic_text` field (Jina embeddings, sentence-sized chunks). Each search fuses a keyword query and a semantic query with reciprocal rank fusion, and the semantic highlighter returns the passage that matched. Facets, agenda lookups and people matching are Elasticsearch queries too. |
-| **Dash0** | OpenTelemetry auto-instrumentation plus custom spans, metrics and logs. `samba.search.es_round_trips` records how many Elasticsearch calls one search needed, which is how the N+1 regression shows up. |
+| **Dash0** | OpenTelemetry auto-instrumentation plus custom spans, metrics and logs, browser monitoring, and a dashboard and an alert rule kept in `observability/`. `samba.search.es_round_trips` records how many Elasticsearch calls one search needed, which is how the N+1 regression shows up. |
 | **Radar** | The app runs in the team's cluster, deployed by Argo CD on every push to `main`. Radar shows the rollout, the topology and the timeline, and runs the AI investigation when something breaks. |
 | **Gitar** | Every feature lands through a pull request that Gitar reviews against this project's own rules in `.gitar/review/` and `.gitar/rules/`. |
 

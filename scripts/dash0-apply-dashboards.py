@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
-"""Create or update the Dash0 dashboards kept in observability/.
+"""Create or update the Dash0 dashboards and alert rules kept in observability/.
 
     ./scripts/dash0-apply-dashboards.py
 
 Reads DASH0_OTLP_ENDPOINT and DASH0_AUTH_TOKEN from .env (the API host is
-derived from the ingress host) and PUTs every observability/*.dashboard.yaml
-to Dash0, using the dashboard's metadata.name as its stable id. Running it
-twice is safe. Needs PyYAML. The token is never printed.
+derived from the ingress host) and PUTs to Dash0:
+
+- every observability/*.dashboard.yaml, with the dashboard's metadata.name
+  as its stable id;
+- every observability/*.check-rule.yaml, with "samba-" plus the file name
+  as its stable id (search-round-trips.check-rule.yaml becomes
+  samba-search-round-trips).
+
+Running it twice is safe. Needs PyYAML. The token is never printed.
 """
 import glob
 import json
@@ -39,25 +45,30 @@ def main():
     host = re.sub(r"^https?://ingress\.", "", endpoint).split("/")[0].split(":")[0]
     dataset = env.get("DASH0_DATASET", "default")
 
-    files = sorted(glob.glob(os.path.join(ROOT, "observability", "*.dashboard.yaml")))
-    if not files:
-        sys.exit("No observability/*.dashboard.yaml files found.")
+    targets = []
+    for path in sorted(glob.glob(os.path.join(ROOT, "observability", "*.dashboard.yaml"))):
+        with open(path, encoding="utf-8") as handle:
+            body = yaml.safe_load(handle)
+        targets.append((path, f"/api/dashboards/{body['metadata']['name']}", body))
+    for path in sorted(glob.glob(os.path.join(ROOT, "observability", "*.check-rule.yaml"))):
+        with open(path, encoding="utf-8") as handle:
+            body = yaml.safe_load(handle)
+        rule_id = "samba-" + os.path.basename(path)[: -len(".check-rule.yaml")]
+        targets.append((path, f"/api/alerting/check-rules/{rule_id}", body))
+    if not targets:
+        sys.exit("Nothing to apply in observability/.")
 
     failed = False
-    for path in files:
-        with open(path, encoding="utf-8") as handle:
-            dashboard = yaml.safe_load(handle)
-        name = dashboard["metadata"]["name"]
+    for path, api_path, body in targets:
         request = urllib.request.Request(
-            f"https://api.{host}/api/dashboards/{name}?dataset={dataset}",
+            f"https://api.{host}{api_path}?dataset={dataset}",
             method="PUT",
-            data=json.dumps(dashboard).encode(),
+            data=json.dumps(body).encode(),
             headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
         )
         try:
-            with urllib.request.urlopen(request, timeout=30) as response:
-                version = json.load(response).get("metadata", {}).get("version")
-                print(f"applied {os.path.basename(path)} as {name} (version {version})")
+            with urllib.request.urlopen(request, timeout=30):
+                print(f"applied {os.path.basename(path)} to {api_path}")
         except urllib.error.HTTPError as error:
             failed = True
             print(f"FAILED {os.path.basename(path)}: HTTP {error.code} {error.read().decode()[:300]}")

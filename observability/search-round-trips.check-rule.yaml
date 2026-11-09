@@ -1,0 +1,23 @@
+name: "Samba search: too many Elasticsearch round trips"
+expression: >-
+  histogram_quantile(0.95, sum by (service_name, service_namespace, le)
+  (rate({otel_metric_name="samba.search.es_round_trips", otel_metric_type="histogram",
+  service_name="samba-stack-overflow", service_namespace="samba"}[5m]))) > $__threshold
+thresholds:
+  degraded: 6
+  failed: 10
+interval: 1m
+for: 2m
+keep_firing_for: 0s
+enabled: true
+labels: {}
+annotations:
+  summary: 'p95 Elasticsearch round trips per search in samba-stack-overflow is {{ $value | printf "%.1f" }} (threshold {{ $__threshold }}, normal is 4), which points to an N+1 regression.'
+  description: >-
+    The p95 of samba.search.es_round_trips for samba-stack-overflow (namespace samba) has
+    been above the threshold for 2 minutes over a 5-minute window. Normally a search needs
+    about 4 Elasticsearch round trips no matter how many results it returns; the known N+1
+    regression pushes it to about 15. Check first: the samba.enrich.strategy attribute on
+    the samba.search spans in the alert window. A strategy that enriches each result with
+    its own Elasticsearch call (instead of one batched lookup) is the N+1 path. Then compare
+    service.version against the last healthy deployment to find the change that switched it.

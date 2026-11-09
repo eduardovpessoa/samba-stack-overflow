@@ -130,3 +130,44 @@ All through git, in pull request #3, so Argo CD applies it:
   rollout never blocks on it.
 - `initialDelaySeconds: 5` on the startup probe, so a healthy start no
   longer logs a Warning.
+
+## 6. After, read back through Radar
+
+Pull request #3 merged at 21:47:44. Argo CD synced the deploy commit
+`20270ec` at 21:48:46 and both pods of the new ReplicaSet `app-799d576957`
+were healthy by 21:49:18, 32 seconds later.
+
+| | Before | After |
+|---|---|---|
+| Checks findings in our namespace (`get_cluster_audit`) | 3 medium | **0** |
+| Live issues (`issues`) | none | none |
+| "Startup probe failed: connection refused" on rollout | 2 events | **none** |
+| Pods | 2 healthy, two nodes | 2 healthy, two nodes |
+
+One thing the after-check turned up that the before did not have: two
+`Readiness probe failed: HTTP probe failed with statuscode: 503` Warning
+events at 21:49:13.
+
+## 7. Radar showed the symptom, Dash0 showed the cause
+
+A 503 on `/readyz` means the pod was still warming up its search index. The
+app's own trace of that warm-up, `samba.store.init`, is in Dash0:
+
+| Pod | Release | Warm-up | First request to Elasticsearch (`GET /`) |
+|---|---|---|---|
+| `app-78f59b5cbb-rqw52` | `7458f9a` | 592 ms | 309 ms |
+| `app-78f59b5cbb-hqzvl` | `7458f9a` | 392 ms | 123 ms |
+| `app-799d576957-bvs2k` | `2c569c8` | 3065 ms | **2773 ms** |
+| `app-799d576957-gwfjq` | `2c569c8` | 3072 ms | **2745 ms** |
+
+Every later call in the warm-up took 13 to 83 ms on all four pods. So on
+the second rollout the first outbound connection from each fresh pod cost
+about 2.7 seconds, the warm-up took 3 seconds instead of half a second, and
+it ran about a second past the first readiness probe. Radar's `issues` call
+flagged a CoreDNS configuration update in the same minute, which may be
+related; that link is not proven.
+
+The pod was right to refuse traffic, so readiness is unchanged. Pull request
+#4 moves the first startup probe from 5 to 8 seconds: boot (about 3 seconds)
+plus the slowest warm-up measured.
+

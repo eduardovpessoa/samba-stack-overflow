@@ -3,12 +3,26 @@
 One story, not four product tours: **a talk finder, and the afternoon it took
 to make it trustworthy.**
 
-Open these tabs before you start:
+Open these tabs before you start recording:
 
-1. The app: https://samba-stack-overflow.cnh.radarhq.io
-2. Dash0: the dashboard "Samba Stack Overflow: search health"
-3. Radar Cloud: cluster `samba-stack-overflow`, the `app` Deployment
-4. GitHub: the pull request list of this repo
+| Tab | What to open |
+|---|---|
+| App | https://samba-stack-overflow.cnh.radarhq.io |
+| Dash0 | Dashboards > "Samba Stack Overflow: search health" |
+| Radar, timeline | https://app.radarhq.io > cluster `samba-stack-overflow` > Timeline |
+| Radar, investigation | AI investigations > the run on Deployment `app` |
+| Radar, Checks | Checks, with Namespace set to `team-samba-stack-overflow` |
+| GitHub | https://github.com/eduardovpessoa/samba-stack-overflow/pulls?q=is%3Apr |
+| Reports | `docs/investigations/` (one for Dash0, one for Radar) and `docs/evidence/` |
+
+The pull requests, in the order they tell the story:
+
+| PR | What it shows |
+|---|---|
+| [#1](https://github.com/eduardovpessoa/samba-stack-overflow/pull/1) | The product. Gitar found a security hole and an accessibility bug; one fixed by hand, one by a commit Gitar pushed. |
+| [#2](https://github.com/eduardovpessoa/samba-stack-overflow/pull/2) | This script. Gitar caught two numbers in it that contradicted each other. |
+| [#3](https://github.com/eduardovpessoa/samba-stack-overflow/pull/3) | Radar's Checks findings fixed. Checks went from 3 to 0. |
+| [#4](https://github.com/eduardovpessoa/samba-stack-overflow/pull/4) | Probe timing set from a Dash0 measurement, after Radar showed the warning. |
 
 ## 0:00 Opening (20 s)
 
@@ -76,9 +90,15 @@ full write-up with times and quotes is
    topology spread is a latent one, and the probe warning goes away with an
    initial delay."
 4. **Checks, before and after.** Show `docs/evidence/radar-checks-before-1.png`
-   next to the live Checks page filtered to our namespace. "Three findings
-   on our Deployment before. All four fixes went through pull request #3:
-   Gitar reviewed it, Argo CD rolled it out, and Radar shows the result."
+   next to the live Checks page with Namespace set to
+   `team-samba-stack-overflow`. "Three findings on our Deployment before,
+   zero now. The fixes went through pull request #3: Gitar reviewed it, Argo
+   CD rolled it out in 32 seconds, and Radar shows the result."
+5. **If you have ten more seconds, the best part.** "The after-check showed
+   one new warning: readiness probe failed, 503. Radar gave me the symptom.
+   Dash0's trace gave me the cause: the first connection from each new pod
+   to Elasticsearch took 2.7 seconds, so warm-up ran past the probe. Two
+   tools, one answer, and a one-line fix in pull request #4."
 
 ## 2:30 Code quality, with Gitar (20 s)
 
@@ -94,6 +114,10 @@ full write-up with times and quotes is
      Gitar pushed that fix itself in `6d0d4c8` when asked.
 3. Point at the labels (`area:search`, `area:deploy`, ...) and the deploy
    reminder comment: both come from this repo's own rules in `.gitar/rules/`.
+4. A good closing line for this part, from pull request #2: "It even
+   reviewed this demo script. I had written '14 milliseconds per round trip'
+   next to '500 to 560 milliseconds', and it pointed out those cannot both
+   be true. It was right: I had compared two different sets of queries."
 
 ## 2:50 Close (10 s)
 
@@ -118,9 +142,14 @@ Only claim what is ticked.
 - [x] Dash0: telemetry from both cluster pods, with pod and namespace names
 - [x] Dash0: browser monitoring from the deployed site (page views, LCP, CLS)
 - [x] Dash0: practice incident on the cluster shows 4 round trips becoming 15
-- [x] Radar: app deployed in the team cluster through Argo CD (version
-      `7458f9a`, two pods, live at the public URL)
-- [ ] Radar: AI investigation run on a real issue
+- [x] Radar: app deployed in the team cluster through Argo CD (two pods on
+      two nodes, live at the public URL, three releases so far)
+- [x] Radar: timeline, issues, Checks and diagnosis read through Radar's MCP
+      server while shipping
+- [x] Radar: hosted AI investigation on Deployment `app` (healthy, certainty
+      established), with a follow-up that ranked the Checks findings
+- [x] Radar: Checks findings in our namespace went from 3 to 0 after pull
+      request #3
 - [x] Gitar: pull request #1 reviewed against the project's rules; two real
       findings, one fixed by hand and one by a commit Gitar pushed; area
       labels and the deploy reminder applied by repository rules

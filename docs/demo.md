@@ -34,17 +34,21 @@ The pull requests, in the order they tell the story:
 ## 0:20 The product, on Elasticsearch (55 s)
 
 1. Type: *"How do I stop getting woken up at 3am by useless pages?"*
-   The top result is **"From Alert Fatigue to Signal"**. Point at the chips:
-   **Meaning #1, Keyword #3**. "None of my words are in that title.
-   Elasticsearch ran a keyword query and a semantic query on Jina embeddings
-   and fused them with reciprocal rank fusion. The card says why it matched."
-2. Click the chip *"I'm a backend dev, new to eBPF"*. "It read 'new to' and
+   The top result is **"From Alert Fatigue to Signal"**, chips **Keyword #1,
+   Meaning #1**. "None of my words are in that title. Elasticsearch ran a
+   keyword query and a semantic query on Jina embeddings and fused them with
+   reciprocal rank fusion. Both agree here, and the card says why."
+2. Type: *"People who cannot hear should still be able to follow my
+   presentation"*. The top result is **"Sign Language Interpreters and
+   You"**, chips **Meaning #1, Keyword #5**. "Keywords alone would have put
+   this fifth. Meaning put it first."
+3. Click the chip *"I'm a backend dev, new to eBPF"*. "It read 'new to' and
    lifted the beginner sessions."
-3. Tick **Captions** and **Step-free access**. "Only talks where the
+4. Tick **Captions** and **Step-free access**. "Only talks where the
    organisers confirmed it. Unknown says 'Not published'. We never guess."
-4. Add two overlapping talks. The **Setlist** flags the clash. "Add to
+5. Add two overlapping talks. The **Setlist** flags the clash. "Add to
    calendar" exports it.
-5. Open **Roda**, paste *"I'm building an AI-powered healthcare scheduling
+6. Open **Roda**, paste *"I'm building an AI-powered healthcare scheduling
    platform using Go, Kubernetes, and PostgreSQL."* "Vector search over demo
    profiles, labelled as demo."
 

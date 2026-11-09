@@ -17,10 +17,16 @@ if [[ ! -f "$env_file" ]]; then
   exit 1
 fi
 
-# Read KEY=value lines without executing the file.
+# Read KEY=value lines without executing the files. .env.local, when present,
+# overrides .env, the same way `npm run dev` loads them.
 value_of() {
-  local line
-  line="$(grep -E "^$1=" "$env_file" | tail -n 1 || true)"
+  local line=""
+  if [[ -f .env.local ]]; then
+    line="$(grep -E "^$1=" .env.local | tail -n 1 || true)"
+  fi
+  if [[ -z "$line" ]]; then
+    line="$(grep -E "^$1=" "$env_file" | tail -n 1 || true)"
+  fi
   printf '%s' "${line#*=}"
 }
 

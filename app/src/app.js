@@ -255,7 +255,14 @@ function createApp({ store, now = () => Date.now() }) {
       'error.type': err?.name || 'Error',
       'error.message': String(err?.message || err).slice(0, 500),
     });
-    const unavailable = err?.name === 'ConnectionError' || err?.name === 'TimeoutError';
+    // Elasticsearch being unreachable, overloaded or refusing our key is an
+    // outage of a dependency (503, retry later), not a bug in this request.
+    const esStatus = err?.name === 'ResponseError' ? err.statusCode : null;
+    const unavailable =
+      err?.name === 'ConnectionError' ||
+      err?.name === 'TimeoutError' ||
+      [401, 403, 429].includes(esStatus) ||
+      esStatus >= 500;
     if (unavailable) res.set('Retry-After', '2');
     return res.status(unavailable ? 503 : 500).json({
       error: unavailable

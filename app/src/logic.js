@@ -4,8 +4,11 @@
 
 const MODES = ['hybrid', 'keyword', 'semantic'];
 const A11Y_KEYS = ['captions', 'stepFree', 'signLanguage', 'lowSensory'];
-const HL_OPEN = '\u0001';
-const HL_CLOSE = '\u0002';
+// Private-use characters mark highlights on the way out of Elasticsearch.
+// They must sit above U+0020: Elasticsearch trims fragments, and control
+// characters at a fragment's edge were being trimmed away with the spaces.
+const HL_OPEN = '\uE000';
+const HL_CLOSE = '\uE001';
 
 class HttpError extends Error {
   constructor(status, code, message) {

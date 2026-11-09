@@ -21,8 +21,9 @@ module.exports = {
     model: env.OPENAI_MODEL || 'gpt-4o-mini',
   },
   // Browser monitoring needs its own ingest-only token: the browser can read it.
+  // If it is the same value as the server token, refuse to hand it out.
   rum:
-    env.DASH0_OTLP_ENDPOINT && env.DASH0_RUM_TOKEN
+    env.DASH0_OTLP_ENDPOINT && env.DASH0_RUM_TOKEN && env.DASH0_RUM_TOKEN !== env.DASH0_AUTH_TOKEN
       ? {
           endpoint: env.DASH0_OTLP_ENDPOINT,
           token: env.DASH0_RUM_TOKEN,

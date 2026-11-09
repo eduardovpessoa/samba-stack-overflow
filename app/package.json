@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node --require ./src/otel.js server.js",
-    "dev": "node --env-file-if-exists=../.env --watch --require ./src/otel.js server.js",
+    "dev": "node --env-file-if-exists=../.env --env-file-if-exists=../.env.local --watch --require ./src/otel.js server.js",
     "test": "node --test"
   },
   "dependencies": {

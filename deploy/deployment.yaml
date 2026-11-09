@@ -14,6 +14,19 @@ spec:
       labels:
         app: app
     spec:
+      # The app never calls the Kubernetes API, so it gets no API token.
+      # (Radar Checks: "Service account token auto-mount".)
+      automountServiceAccountToken: false
+      # Prefer one replica per node, so losing a node does not take both.
+      # ScheduleAnyway keeps a rollout from blocking on a full node.
+      # (Radar Checks: "Missing topology spread constraints".)
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: app
       containers:
         - name: app
           image: app
@@ -103,10 +116,14 @@ spec:
               path: /healthz
               port: http
             periodSeconds: 10
+          # Node and OpenTelemetry need a few seconds before the port opens.
+          # Probing from second zero logged "Startup probe failed: connection
+          # refused" Warning events on every healthy rollout (seen in Radar).
           startupProbe:
             httpGet:
               path: /healthz
               port: http
+            initialDelaySeconds: 5
             periodSeconds: 2
             failureThreshold: 30
           securityContext:

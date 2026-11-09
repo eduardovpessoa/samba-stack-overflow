@@ -6,9 +6,10 @@ kind: Kustomization
 namespace: team-samba-stack-overflow
 resources:
   - deployment.yaml
+  - pdb.yaml
   - service.yaml
   - httproute.yaml
 images:
   - name: app
     newName: ghcr.io/eduardovpessoa/samba-stack-overflow
-    newTag: 7458f9a
+    newTag: 2c569c8

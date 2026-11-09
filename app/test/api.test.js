@@ -171,26 +171,53 @@ test('setlists reject bad input and unknown ids are 404s', async () => {
   }
 });
 
-test('saving setlists is rate limited per server', async () => {
+test('saving setlists is limited per visitor, so one client cannot block the rest', async () => {
   let clock = 1_000_000;
   const app = createApp({ store: createOfflineStore({ sessions, people }), opsToken: '', deployEnv: 'local', now: () => clock });
   const srv = await new Promise((resolve) => {
     const s = app.listen(0, () => resolve(s));
   });
-  const save = () =>
+  // The app trusts one proxy hop, so X-Forwarded-For stands in for the visitor's address.
+  const save = (client, ids = [sessions[0].id]) =>
     fetch(`http://127.0.0.1:${srv.address().port}/api/setlists`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ ids: [sessions[0].id] }),
+      headers: { 'content-type': 'application/json', 'x-forwarded-for': client },
+      body: JSON.stringify({ ids }),
     });
   try {
-    for (let i = 0; i < 20; i += 1) assert.equal((await save()).status, 201, `save ${i + 1}`);
-    const refused = await save();
+    for (let i = 0; i < 6; i += 1) assert.equal((await save('203.0.113.7')).status, 201, `save ${i + 1}`);
+    const refused = await save('203.0.113.7');
     assert.equal(refused.status, 429);
     assert.equal(refused.headers.get('retry-after'), '30');
     assert.equal((await refused.json()).error.code, 'rate_limited');
+
+    assert.equal((await save('203.0.113.8')).status, 201, 'another visitor is not affected');
+
+    // Requests that save nothing do not spend the budget.
+    for (let i = 0; i < 10; i += 1) assert.equal((await save('203.0.113.9', ['s-does-not-exist'])).status, 400);
+    assert.equal((await save('203.0.113.9')).status, 201, 'invalid saves cost nothing');
+
     clock += 61_000;
-    assert.equal((await save()).status, 201, 'the window slides');
+    assert.equal((await save('203.0.113.7')).status, 201, 'the window slides');
+  } finally {
+    await new Promise((resolve) => srv.close(resolve));
+  }
+});
+
+test('the pod-wide cap is a backstop behind the per-visitor limit', async () => {
+  const app = createApp({ store: createOfflineStore({ sessions, people }), opsToken: '', deployEnv: 'local', now: () => 5_000_000 });
+  const srv = await new Promise((resolve) => {
+    const s = app.listen(0, () => resolve(s));
+  });
+  const save = (client) =>
+    fetch(`http://127.0.0.1:${srv.address().port}/api/setlists`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-forwarded-for': client },
+      body: JSON.stringify({ ids: [sessions[0].id] }),
+    });
+  try {
+    for (let i = 0; i < 30; i += 1) assert.equal((await save(`198.51.100.${i}`)).status, 201, `visitor ${i}`);
+    assert.equal((await save('198.51.100.200')).status, 429, 'a new visitor is refused once the pod cap is reached');
   } finally {
     await new Promise((resolve) => srv.close(resolve));
   }

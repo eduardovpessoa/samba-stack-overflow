@@ -155,7 +155,9 @@ the free time. Unknown ids are ignored; if none is known the list is empty.
 Saves a setlist in Elasticsearch so it can be shared. Body
 `{ "ids": string[], "name"?: string }` (1 to 60 known ids, name up to 60
 characters, plain text). Unknown ids are dropped; `400` if none is known.
-Limited to 20 saves per minute per server: beyond that `429 rate_limited`.
+Limited to 6 saves per minute per visitor, with a cap of 30 per minute per
+server behind it: beyond either, `429 rate_limited`. Only a save that
+succeeds counts.
 
 `201 { "id": string, "count": number }`. A saved setlist never changes:
 sharing again creates a new one.

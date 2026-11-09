@@ -115,17 +115,31 @@ function parseSetlistId(value) {
 }
 
 /**
- * A small sliding-window limiter for public write endpoints. It is per
- * process, so it bounds what one pod will accept, not the whole deployment.
+ * A small sliding-window limiter for public write endpoints, with one window
+ * per key (a client address, or "" for everyone together). It is per process,
+ * so it bounds what one pod will accept, not the whole deployment.
  */
-function createRateLimiter({ limit, windowMs, now = () => Date.now() }) {
-  let stamps = [];
+function createRateLimiter({ limit, windowMs, now = () => Date.now(), maxKeys = 5000 }) {
+  const windows = new Map();
+  const fresh = (stamps, cutoff) => stamps.filter((t) => t > cutoff);
   return {
-    take() {
+    /** Would a take() for this key succeed right now? Does not spend anything. */
+    allows(key = '') {
+      return fresh(windows.get(key) || [], now() - windowMs).length < limit;
+    },
+    take(key = '') {
       const cutoff = now() - windowMs;
-      stamps = stamps.filter((t) => t > cutoff);
-      if (stamps.length >= limit) return false;
+      const stamps = fresh(windows.get(key) || [], cutoff);
+      if (stamps.length >= limit) {
+        windows.set(key, stamps);
+        return false;
+      }
       stamps.push(now());
+      windows.set(key, stamps);
+      // Keep memory bounded: forget keys whose window has emptied.
+      if (windows.size > maxKeys) {
+        for (const [k, v] of windows) if (fresh(v, cutoff).length === 0) windows.delete(k);
+      }
       return true;
     },
   };

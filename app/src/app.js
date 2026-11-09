@@ -27,7 +27,9 @@ const CHAOS_MODES = ['off', 'n-plus-one'];
 const CHAOS_TTL_MS = 10 * 60 * 1000; // a practice incident switches itself off
 const CHAOS_CACHE_MS = 3000;
 const FACETS_CACHE_MS = 60 * 1000;
-const SETLIST_SAVES_PER_MINUTE = 20;
+// Per visitor, and a larger cap per pod as a backstop.
+const SETLIST_SAVES_PER_CLIENT = 6;
+const SETLIST_SAVES_PER_POD = 30;
 // The pod name in the cluster, the host name on a laptop.
 const SERVED_BY = process.env.POD_NAME || os.hostname();
 
@@ -41,6 +43,8 @@ function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, 
   const app = express();
   const ask = createAsk({ store, openai: config.openai });
   app.disable('x-powered-by');
+  // So req.ip is the visitor's address, not the gateway's.
+  app.set('trust proxy', config.trustProxyHops);
   app.use(express.json({ limit: '32kb' }));
   app.use((req, res, next) => {
     res.set({
@@ -86,7 +90,8 @@ function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, 
     );
   }
 
-  const setlistSaves = createRateLimiter({ limit: SETLIST_SAVES_PER_MINUTE, windowMs: 60 * 1000, now });
+  const savesByClient = createRateLimiter({ limit: SETLIST_SAVES_PER_CLIENT, windowMs: 60 * 1000, now });
+  const savesByPod = createRateLimiter({ limit: SETLIST_SAVES_PER_POD, windowMs: 60 * 1000, now });
 
   let facetsCache = { value: null, readAt: 0 };
   async function facets() {
@@ -239,13 +244,19 @@ function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, 
 
   app.post('/api/setlists', requireReady, async (req, res) => {
     const { ids, name } = parseSetlistBody(req.body);
-    // Anyone can call this, so each pod only accepts a bounded number a minute.
-    if (!setlistSaves.take()) {
+    // Anyone can call this. Each visitor gets a small budget of their own, so
+    // one client cannot use up everyone's, and the pod has a larger cap behind
+    // it. (Found by Gitar on PR #6: it used to be one shared bucket.)
+    const client = req.ip || 'unknown';
+    const refuse = () => {
       res.set('Retry-After', '30');
       throw new HttpError(429, 'rate_limited', 'Too many setlists are being shared right now. Try again in a moment.');
-    }
+    };
+    if (!savesByClient.allows(client) || !savesByPod.allows()) refuse();
     const known = (await store.getMany(ids)).map((s) => s.id);
     if (known.length === 0) throw badRequest('None of those talks exist.');
+    // Only a save that is actually going to happen spends from the budgets.
+    if (!savesByClient.take(client) || !savesByPod.take()) refuse();
     const id = crypto.randomBytes(9).toString('base64url');
     await withSpan('samba.setlist.save', { 'samba.setlist.count': known.length }, () =>
       store.saveSetlist({ id, ids: known, name, createdAt: new Date(now()).toISOString() })
@@ -257,10 +268,15 @@ function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, 
 
   app.get('/api/setlists/:id', requireReady, async (req, res) => {
     const id = parseSetlistId(req.params.id);
-    const saved = await store.getSetlist(id);
-    if (!saved) throw new HttpError(404, 'not_found', 'No setlist with that id.');
-    const items = await store.getMany(saved.ids);
-    res.json({ id, name: saved.name || '', createdAt: saved.createdAt, items, conflicts: findConflicts(items) });
+    const body = await withSpan('samba.setlist.open', {}, async (span) => {
+      const saved = await store.getSetlist(id);
+      span.setAttribute('samba.setlist.found', Boolean(saved));
+      if (!saved) throw new HttpError(404, 'not_found', 'No setlist with that id.');
+      const items = await store.getMany(saved.ids);
+      span.setAttribute('samba.setlist.count', items.length);
+      return { id, name: saved.name || '', createdAt: saved.createdAt, items, conflicts: findConflicts(items) };
+    });
+    res.json(body);
   });
 
   app.get('/api/agenda.ics', requireReady, async (req, res) => {

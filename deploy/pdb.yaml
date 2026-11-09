@@ -1,0 +1,13 @@
+# With two replicas, let voluntary disruptions (node drains, upgrades) take one
+# pod at a time, never both. (Radar Checks: "Missing PodDisruptionBudget".)
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: app
+  labels:
+    app: app
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: app

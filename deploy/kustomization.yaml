@@ -6,6 +6,7 @@ kind: Kustomization
 namespace: team-samba-stack-overflow
 resources:
   - deployment.yaml
+  - pdb.yaml
   - service.yaml
   - httproute.yaml
 images:

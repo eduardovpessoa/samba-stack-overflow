@@ -146,9 +146,12 @@ practice incident, and search again.
 > "Three findings on my app before. Zero now."
 
 *(optional)* **Say:**
-> "The best part: after the fix, Radar showed one *new* warning. Radar gave
-> me the symptom. Dash0 gave me the cause: the first connection from a new
-> pod took 2.7 seconds. Two tools, one answer, one line of fix."
+> "And one honest ending. After that fix, Radar showed a *new* warning.
+> Radar gave me the symptom. Dash0 gave me the cause: on some new pods the
+> first connection to Elasticsearch takes up to five seconds. My first fix,
+> a longer wait before the health check, worked once and not the next time.
+> So I have not fixed it yet. But I know it is the connection and not the
+> check, and I only know that because I had both tools."
 
 ## Scene 5. Never merge broken (30 seconds)
 
@@ -186,6 +189,7 @@ practice incident, and search again.
 | What does "hybrid" mean? | Two searches per question, a keyword one and a semantic one on Jina embeddings, fused by Elasticsearch with reciprocal rank fusion. |
 | Is the incident fake? | The switch is on purpose, the slowdown is real: the code makes one Elasticsearch call per result instead of one for all. It turns itself off after ten minutes and needs a token. |
 | Are the notifications push? | No. They are reminders the app schedules itself, so they work while it is open or recently in the background. Push to a closed app would need a push server. |
+| What is still broken? | On some rollouts a new pod's first connection to Elasticsearch takes up to five seconds, so Kubernetes logs a "not ready yet" warning. No visitor is affected, because the pod gets no traffic until it is ready. The cause is not confirmed and it is not fixed. |
 | Does "Ask" work? | The code is there, but it is switched off: no language model key is configured on the cluster. |
 | What did the AI tools actually change? | Gitar: a security fix and an accessibility fix on PR #1, a wrong number in this script on PR #2. Dash0 Agent0: retry hints on 503s. Radar: three hardening fixes and a probe delay, PRs #3 and #4. |
 
@@ -196,7 +200,7 @@ practice incident, and search again.
 | [#1](https://github.com/eduardovpessoa/samba-stack-overflow/pull/1) | The product. Gitar found a security hole and an accessibility bug. |
 | [#2](https://github.com/eduardovpessoa/samba-stack-overflow/pull/2) | This script. Gitar caught two numbers that contradicted each other. |
 | [#3](https://github.com/eduardovpessoa/samba-stack-overflow/pull/3) | Radar's findings fixed. Checks went from 3 to 0. |
-| [#4](https://github.com/eduardovpessoa/samba-stack-overflow/pull/4) | Probe timing, set from a Dash0 measurement after Radar showed the warning. |
+| [#4](https://github.com/eduardovpessoa/samba-stack-overflow/pull/4) | Probe timing, set from a Dash0 measurement after Radar showed a warning. It helped once; it did not fully fix it. |
 | [#5](https://github.com/eduardovpessoa/samba-stack-overflow/pull/5) | The before and after of three releases, written down. |
 | [#6](https://github.com/eduardovpessoa/samba-stack-overflow/pull/6) | Shared setlists, "Fill my free time", visible round trips, and the installable app. |
 
@@ -235,7 +239,12 @@ Only claim what is ticked.
       monitoring from the deployed site
 - [x] Dash0: dashboard and an alert rule on round trips, both kept in git
 - [x] Dash0: Agent0 investigation through MCP, with a shipped fix
-- [x] Dash0: practice incident on the cluster shows 4 round trips becoming 15
+- [x] Dash0: practice incident on the cluster shows 4 round trips becoming 15,
+      on the page and in Dash0
+- [x] Shared setlists, "Fill my free time" and the round-trips line, checked
+      on the live site
+- [ ] A reminder notification actually appearing, and installing on a phone:
+      not checked by the author's tools. Try both before showing them
 - [x] Radar: app deployed in the team cluster through Argo CD (two pods on
       two nodes, live at the public URL)
 - [x] Radar: timeline, issues, Checks and diagnosis read through Radar's MCP
@@ -243,7 +252,9 @@ Only claim what is ticked.
 - [x] Radar: hosted AI investigation on Deployment `app` (healthy, certainty
       established), with a follow-up that ranked the Checks findings
 - [x] Radar: Checks findings in our namespace went from 3 to 0
-- [x] Radar and Dash0 together: a readiness warning seen in Radar, explained
-      by a Dash0 trace, fixed in pull request #4; the next rollout was clean
+- [x] Radar and Dash0 together: a readiness warning seen in Radar and
+      explained by a Dash0 trace (a slow first connection from new pods)
+- [ ] That warning fixed. Pull request #4 made one rollout clean, and the
+      next one showed it again. Not fixed; visitors are not affected
 - [x] Gitar: every change landed through a reviewed pull request; real
       findings on #1 and #2, one fixed by a commit Gitar pushed

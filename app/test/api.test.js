@@ -265,6 +265,58 @@ test('expensive reads are limited per visitor, and probes never are', async () =
   }
 });
 
+test('ask and the calendar export are behind the read limit too', async () => {
+  const app = createApp({
+    store: createOfflineStore({ sessions, people }),
+    opsToken: '',
+    deployEnv: 'local',
+    now: () => 11_000_000,
+    readLimits: { perClient: 2, perPod: 100 },
+  });
+  const srv = await new Promise((resolve) => {
+    const s = app.listen(0, () => resolve(s));
+  });
+  const url = `http://127.0.0.1:${srv.address().port}`;
+  const from = (client) => ({ 'x-forwarded-for': client, 'content-type': 'application/json' });
+  try {
+    // Two reads allowed, whatever they are; the third is refused on every limited route.
+    assert.equal((await fetch(`${url}/api/agenda.ics?ids=${sessions[0].id}`, { headers: from('203.0.113.60') })).status, 200);
+    assert.equal((await fetch(`${url}/api/ask`, { method: 'POST', headers: from('203.0.113.60'), body: '{"question":"x"}' })).status, 503);
+    assert.equal((await fetch(`${url}/api/agenda.ics?ids=${sessions[0].id}`, { headers: from('203.0.113.60') })).status, 429);
+    assert.equal((await fetch(`${url}/api/ask`, { method: 'POST', headers: from('203.0.113.60'), body: '{"question":"x"}' })).status, 429);
+  } finally {
+    await new Promise((resolve) => srv.close(resolve));
+  }
+});
+
+test('a read refused because the pod is full does not cost the visitor', async () => {
+  let clock = 12_000_000;
+  const app = createApp({
+    store: createOfflineStore({ sessions, people }),
+    opsToken: '',
+    deployEnv: 'local',
+    now: () => clock,
+    readLimits: { perClient: 3, perPod: 2 },
+  });
+  const srv = await new Promise((resolve) => {
+    const s = app.listen(0, () => resolve(s));
+  });
+  const url = `http://127.0.0.1:${srv.address().port}`;
+  const search = (client) => fetch(`${url}/api/search?q=kubernetes`, { headers: { 'x-forwarded-for': client } });
+  try {
+    assert.equal((await search('203.0.113.70')).status, 200);
+    assert.equal((await search('203.0.113.71')).status, 200);
+    // The pod is now full. This visitor is refused five times...
+    for (let i = 0; i < 5; i += 1) assert.equal((await search('203.0.113.72')).status, 429);
+    // ...and still has the whole personal budget once the pod window frees up.
+    clock += 61_000;
+    assert.equal((await search('203.0.113.72')).status, 200);
+    assert.equal((await search('203.0.113.72')).status, 200);
+  } finally {
+    await new Promise((resolve) => srv.close(resolve));
+  }
+});
+
 test('calendar export is an ics download', async () => {
   const res = await get(`/api/agenda.ics?ids=${sessions[0].id}`);
   assert.equal(res.status, 200);

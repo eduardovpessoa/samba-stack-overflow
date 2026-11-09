@@ -150,7 +150,14 @@ function createApp({
   const readsByClient = createRateLimiter({ limit: readLimits.perClient, windowMs: 60 * 1000, now });
   const readsByPod = createRateLimiter({ limit: readLimits.perPod, windowMs: 60 * 1000, now });
   const limitReads = (req, res, next) => {
-    if (readsByClient.take(req.ip || 'unknown') && readsByPod.take()) return next();
+    const client = req.ip || 'unknown';
+    // Look at both budgets before spending from either: a request refused
+    // because the pod is full must not also count against the visitor.
+    if (readsByClient.allows(client) && readsByPod.allows()) {
+      readsByClient.take(client);
+      readsByPod.take();
+      return next();
+    }
     res.set('Retry-After', '10');
     return next(new HttpError(429, 'rate_limited', 'That is a lot of requests. Give it a few seconds.'));
   };
@@ -337,7 +344,7 @@ function createApp({
     res.json(body);
   });
 
-  app.get('/api/agenda.ics', requireReady, async (req, res) => {
+  app.get('/api/agenda.ics', limitReads, requireReady, async (req, res) => {
     const items = await store.getMany(parseIds(req.query.ids));
     res
       .type('text/calendar; charset=utf-8')
@@ -360,7 +367,7 @@ function createApp({
     });
   });
 
-  app.post('/api/ask', requireReady, async (req, res) => {
+  app.post('/api/ask', limitReads, requireReady, async (req, res) => {
     const question = typeof req.body?.question === 'string' ? req.body.question.trim() : '';
     if (!question) throw badRequest('question is required.');
     if (question.length > 500) throw badRequest('question must be 500 characters or fewer.');

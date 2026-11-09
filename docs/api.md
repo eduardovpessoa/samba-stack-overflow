@@ -23,7 +23,7 @@ Every 503 and 429 carries a `Retry-After` header in seconds.
 
 The endpoints that make Elasticsearch work (`/api/search`, `/api/people`,
 `/api/sessions/:id`, `/api/agenda`, `/api/agenda/suggest`,
-`/api/setlists/:id`) share a read limit of 240 requests a minute per
+`/api/agenda.ics`, `/api/setlists/:id` and `/api/ask`) share a read limit of 240 requests a minute per
 visitor, with 1200 a minute per server behind it: beyond either,
 `429 rate_limited`. A 503 is short-lived
 (the index is warming up after a restart, or a dependency hiccuped), so

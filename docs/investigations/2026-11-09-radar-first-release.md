@@ -171,3 +171,24 @@ The pod was right to refuse traffic, so readiness is unchanged. Pull request
 #4 moves the first startup probe from 5 to 8 seconds: boot (about 3 seconds)
 plus the slowest warm-up measured.
 
+## 8. The third rollout
+
+Pull request #4 merged at 21:58:24 and rolled out between 21:59:12 and
+21:59:45. Read back through Radar and Dash0:
+
+| | Release 1 (`7458f9a`) | Release 2 (`2c569c8`) | Release 3 (`09a6cd2`) |
+|---|---|---|---|
+| First startup probe at | 0 s | 5 s | 8 s |
+| Warning events during rollout | startup probe, connection refused (2) | readiness probe, 503 (2) | **none** |
+| Warm-up (`samba.store.init`) | 592 ms, 392 ms | 3065 ms, 3072 ms | 420 ms, 594 ms |
+| Checks findings in our namespace | 3 | 0 | 0 |
+| Time from sync to both pods healthy | 24 s | 32 s | 33 s |
+
+What this does and does not show: the third rollout was clean, and the two
+earlier kinds of warning did not come back. But its warm-up was also fast
+again, so this rollout did not exercise the slow case. That an 8 second
+delay covers a 3 second warm-up rests on the measurements (about 3 seconds
+to open the port plus 3.1 seconds), not on having seen it happen. The slow
+first connection on release 2 looks like a one-off at that minute; Radar's
+note about a CoreDNS update then is the only lead, and it is unproven.
+

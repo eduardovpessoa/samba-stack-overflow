@@ -102,7 +102,8 @@ full write-up with times and quotes is
    one new warning: readiness probe failed, 503. Radar gave me the symptom.
    Dash0's trace gave me the cause: the first connection from each new pod
    to Elasticsearch took 2.7 seconds, so warm-up ran past the probe. Two
-   tools, one answer, and a one-line fix in pull request #4."
+   tools, one answer, and a one-line fix in pull request #4. The rollout
+   after it logged no warnings at all."
 
 ## 2:30 Code quality, with Gitar (20 s)
 
@@ -154,6 +155,8 @@ Only claim what is ticked.
       established), with a follow-up that ranked the Checks findings
 - [x] Radar: Checks findings in our namespace went from 3 to 0 after pull
       request #3
+- [x] Radar and Dash0 together: a readiness warning seen in Radar, explained
+      by a Dash0 trace, fixed in pull request #4; the next rollout was clean
 - [x] Gitar: pull request #1 reviewed against the project's rules; two real
       findings, one fixed by hand and one by a commit Gitar pushed; area
       labels and the deploy reminder applied by repository rules

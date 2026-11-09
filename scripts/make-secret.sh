@@ -41,6 +41,14 @@ for key in "${required[@]}"; do
   fi
 done
 
+# The practice-incident switch needs an ops token on the cluster. Make one the
+# first time and keep it in .env.local, where you can read it for the demo.
+if [[ -z "$(value_of OPS_TOKEN)" ]]; then
+  umask 077
+  printf 'OPS_TOKEN=%s\n' "$(node -e 'process.stdout.write(require("node:crypto").randomBytes(18).toString("base64url"))')" >> .env.local
+  echo "Generated OPS_TOKEN and saved it in .env.local."
+fi
+
 # JSON string quoting is valid YAML and survives any character in a token.
 quote() {
   node -e 'process.stdout.write(JSON.stringify(process.argv[1]))' "$1"
@@ -59,7 +67,7 @@ umask 077
   echo "  elasticsearch-api-key: $(quote "$(value_of ELASTICSEARCH_API_KEY)")"
   echo "  dash0-otlp-endpoint: $(quote "$(value_of DASH0_OTLP_ENDPOINT)")"
   echo "  dash0-auth-token: $(quote "$(value_of DASH0_AUTH_TOKEN)")"
-  for pair in "DASH0_RUM_TOKEN:dash0-rum-token" "OPENAI_API_KEY:openai-api-key"; do
+  for pair in "DASH0_RUM_TOKEN:dash0-rum-token" "OPENAI_API_KEY:openai-api-key" "OPS_TOKEN:ops-token"; do
     key="${pair%%:*}"
     name="${pair##*:}"
     if [[ -n "$(value_of "$key")" ]]; then

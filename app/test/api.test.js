@@ -13,7 +13,8 @@ let server;
 let base;
 
 before(async () => {
-  const app = createApp({ store: createOfflineStore({ sessions, people }) });
+  // Local development: no ops token, so the practice switch is open.
+  const app = createApp({ store: createOfflineStore({ sessions, people }), opsToken: '', deployEnv: 'local' });
   await new Promise((resolve) => {
     server = app.listen(0, resolve);
   });
@@ -42,6 +43,7 @@ test('meta is honest about the offline fallback', async () => {
   assert.equal(meta.facets.days.length, 3);
   assert.equal(meta.features.ask, false);
   assert.equal(meta.chaos.mode, 'off');
+  assert.equal(meta.chaos.protected, false);
 });
 
 test('search returns the contract shape', async () => {
@@ -144,6 +146,53 @@ test('a store that is still warming up answers 503 with Retry-After', async () =
     assert.equal(ready.status, 503);
     assert.deepEqual(await ready.json(), { ready: false, reason: 'starting' });
     assert.equal((await fetch(`${url}/healthz`)).status, 200, 'liveness ignores dependencies');
+  } finally {
+    await new Promise((resolve) => srv.close(resolve));
+  }
+});
+
+test('the practice switch needs the ops token once one is configured', async () => {
+  const app = createApp({ store: createOfflineStore({ sessions, people }), opsToken: 'test-ops-token', deployEnv: 'hackathon' });
+  const srv = await new Promise((resolve) => {
+    const s = app.listen(0, () => resolve(s));
+  });
+  const url = `http://127.0.0.1:${srv.address().port}`;
+  const flip = (headers) =>
+    fetch(`${url}/api/chaos`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', ...headers },
+      body: JSON.stringify({ mode: 'n-plus-one' }),
+    });
+  try {
+    for (const headers of [{}, { 'x-ops-token': 'wrong-ops-token' }, { 'x-ops-token': 'test-ops-token-and-more' }]) {
+      const res = await flip(headers);
+      assert.equal(res.status, 403, JSON.stringify(headers));
+      assert.equal((await res.json()).error.code, 'forbidden');
+    }
+    assert.deepEqual(await (await fetch(`${url}/api/chaos`)).json(), { mode: 'off' }, 'refused calls change nothing');
+    assert.equal((await (await fetch(`${url}/api/meta`)).json()).chaos.protected, true);
+
+    const ok = await flip({ 'x-ops-token': 'test-ops-token' });
+    assert.equal(ok.status, 200);
+    assert.deepEqual(await ok.json(), { mode: 'n-plus-one' });
+  } finally {
+    await new Promise((resolve) => srv.close(resolve));
+  }
+});
+
+test('a deployed environment without an ops token keeps the switch locked', async () => {
+  const app = createApp({ store: createOfflineStore({ sessions, people }), opsToken: '', deployEnv: 'hackathon' });
+  const srv = await new Promise((resolve) => {
+    const s = app.listen(0, () => resolve(s));
+  });
+  try {
+    const res = await fetch(`http://127.0.0.1:${srv.address().port}/api/chaos`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-ops-token': '' },
+      body: JSON.stringify({ mode: 'n-plus-one' }),
+    });
+    assert.equal(res.status, 403);
+    assert.equal((await res.json()).error.code, 'forbidden');
   } finally {
     await new Promise((resolve) => srv.close(resolve));
   }

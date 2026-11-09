@@ -1,5 +1,6 @@
 'use strict';
 
+const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const express = require('express');
@@ -22,7 +23,7 @@ const CHAOS_TTL_MS = 10 * 60 * 1000; // a practice incident switches itself off
 const CHAOS_CACHE_MS = 3000;
 const FACETS_CACHE_MS = 60 * 1000;
 
-function createApp({ store, now = () => Date.now() }) {
+function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, deployEnv = config.deployEnv }) {
   const app = express();
   const ask = createAsk({ store, openai: config.openai });
   app.disable('x-powered-by');
@@ -49,6 +50,26 @@ function createApp({ store, now = () => Date.now() }) {
     }
     chaosCache = { mode, readAt: now() };
     return mode;
+  }
+
+  // The switch slows search for everyone, so on any deployed environment only
+  // someone holding the ops token may flip it. Local development stays open.
+  // (Found by Gitar on PR #1: the endpoint used to be open on a public URL.)
+  const chaosProtected = Boolean(opsToken) || deployEnv !== 'local';
+  function requireOpsToken(req) {
+    if (!chaosProtected) return;
+    const given = Buffer.from(String(req.get('x-ops-token') || ''));
+    const expected = Buffer.from(opsToken);
+    const ok = expected.length > 0 && given.length === expected.length && crypto.timingSafeEqual(given, expected);
+    if (ok) return;
+    log('warn', 'practice incident switch refused', { 'samba.chaos.token_configured': expected.length > 0 });
+    throw new HttpError(
+      403,
+      'forbidden',
+      expected.length > 0
+        ? 'The practice switch needs a valid ops token.'
+        : 'The practice switch is disabled here: no ops token is configured.'
+    );
   }
 
   let facetsCache = { value: null, readAt: 0 };
@@ -85,7 +106,7 @@ function createApp({ store, now = () => Date.now() }) {
       facets: await facets(),
       features: { ask: ask.available },
       rum: config.rum,
-      chaos: { mode: await chaosMode() },
+      chaos: { mode: await chaosMode(), protected: chaosProtected },
     });
   });
 
@@ -217,6 +238,7 @@ function createApp({ store, now = () => Date.now() }) {
 
   app.get('/api/chaos', async (req, res) => res.json({ mode: await chaosMode() }));
   app.post('/api/chaos', async (req, res) => {
+    requireOpsToken(req);
     const mode = req.body?.mode;
     if (!CHAOS_MODES.includes(mode)) throw badRequest(`mode must be one of: ${CHAOS_MODES.join(', ')}.`);
     await store.setFlag('chaos', { mode, expiresAt: now() + CHAOS_TTL_MS });

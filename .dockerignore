@@ -1,0 +1,11 @@
+# Kept out of the image build context.
+.git
+**/node_modules
+**/dist
+app/public
+app/test
+**/*kubeconfig*
+**/.env
+**/.env.*
+**/*.pem
+**/*.key

@@ -1,0 +1,1401 @@
+[
+  {
+    "id": "s-platform-is-a-product",
+    "title": "The Platform Is a Product: Lessons from Paved Roads",
+    "description": "Most internal platforms fail because nobody treated developers as customers. Marisol walks through ten years of paved roads, abandoned portals and one painful rewrite at a fictional logistics company. You will leave with a lightweight product canvas, three metrics that predict adoption, and a checklist for deciding what the platform team should refuse to build.",
+    "speakers": [
+      {
+        "name": "Marisol Quintanar",
+        "role": "VP of Platform",
+        "company": "Orbitwell"
+      }
+    ],
+    "track": "Developer Experience",
+    "format": "Keynote",
+    "level": "Beginner",
+    "room": "Maracanã Hall",
+    "start": "2026-11-10T09:00:00-07:00",
+    "end": "2026-11-10T09:45:00-07:00",
+    "day": "2026-11-10",
+    "tags": [
+      "platform",
+      "product-thinking",
+      "internal-platform",
+      "culture"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "yes",
+      "lowSensory": "no"
+    }
+  },
+  {
+    "id": "s-seeing-inside-the-kernel",
+    "title": "Seeing Inside the Kernel Without Loading Modules",
+    "description": "Kernel modules are risky, but sometimes the only way to answer why a packet vanished or a syscall stalled. This talk shows how sandboxed programs attached to kernel hooks give you the same visibility with a verifier standing guard. We walk through a real latency investigation on a Kubernetes node and cover the safety model, overhead numbers and the tools worth installing first.",
+    "speakers": [
+      {
+        "name": "Tavares Okonkwo",
+        "role": "Systems Engineer",
+        "company": "Quartzline"
+      }
+    ],
+    "track": "Observability",
+    "format": "Talk",
+    "level": "Intermediate",
+    "room": "Maracanã Hall",
+    "start": "2026-11-10T10:00:00-07:00",
+    "end": "2026-11-10T10:35:00-07:00",
+    "day": "2026-11-10",
+    "tags": [
+      "ebpf",
+      "kernel",
+      "tracing",
+      "linux",
+      "networking"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-argo-cd-first-week",
+    "title": "Your First Week with Argo CD: Git Push to Pods",
+    "description": "If your deploys still involve kubectl and crossed fingers, this talk is your gentle on-ramp to GitOps. We start with an empty cluster and a single repository, then install Argo CD, define an Application, and watch drift get corrected automatically. You will see sync policies, health checks and rollbacks explained with plain examples and the three mistakes every newcomer makes.",
+    "speakers": [
+      {
+        "name": "Leocádia Brandão",
+        "role": "Platform Engineer",
+        "company": "Caatinga Cloud"
+      }
+    ],
+    "track": "Kubernetes & Platform",
+    "format": "Talk",
+    "level": "Beginner",
+    "room": "Ipanema Room",
+    "start": "2026-11-10T10:00:00-07:00",
+    "end": "2026-11-10T10:35:00-07:00",
+    "day": "2026-11-10",
+    "tags": [
+      "gitops",
+      "argo-cd",
+      "kubernetes",
+      "deployment"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-ebpf-for-absolute-beginners",
+    "title": "Hands-On eBPF for Absolute Beginners",
+    "description": "No kernel experience required. In ninety minutes you will write, compile and load your first eBPF programs in a prepared sandbox, counting syscalls, tracing file opens and watching TCP connections as they happen. We explain maps, hooks and the verifier in everyday language, and finish by wiring one probe into a metrics dashboard. Bring a laptop with a browser; everything else is provided.",
+    "speakers": [
+      {
+        "name": "Ingrid Valdemar",
+        "role": "Developer Advocate",
+        "company": "Quartzline"
+      },
+      {
+        "name": "Dayo Fashola",
+        "role": "SRE",
+        "company": "Harborlight"
+      }
+    ],
+    "track": "Observability",
+    "format": "Workshop",
+    "level": "Beginner",
+    "room": "Lapa Room",
+    "start": "2026-11-10T10:00:00-07:00",
+    "end": "2026-11-10T11:30:00-07:00",
+    "day": "2026-11-10",
+    "tags": [
+      "ebpf",
+      "workshop",
+      "beginners",
+      "linux",
+      "observability"
+    ],
+    "accessibility": {
+      "captions": "unknown",
+      "stepFree": "no",
+      "signLanguage": "unknown",
+      "lowSensory": "yes"
+    }
+  },
+  {
+    "id": "s-five-dashboards-deleted",
+    "title": "Five Dashboards I Deleted and Why",
+    "description": "A fifteen minute confession about pretty graphs that never helped anyone during an incident. Nalani shows five real dashboard patterns, why each failed on call, and what replaced them. Expect a ruthless checklist for pruning your own wall of charts, a simple way to tie panels to service level objectives, and a few jokes at the expense of pie charts.",
+    "speakers": [
+      {
+        "name": "Nalani Whitcombe",
+        "role": "Observability Lead",
+        "company": "Tidepool Works"
+      }
+    ],
+    "track": "Observability",
+    "format": "Lightning",
+    "level": "Beginner",
+    "room": "Pelourinho Room",
+    "start": "2026-11-10T10:15:00-07:00",
+    "end": "2026-11-10T10:30:00-07:00",
+    "day": "2026-11-10",
+    "tags": [
+      "dashboards",
+      "monitoring",
+      "slo",
+      "alerting"
+    ],
+    "accessibility": {
+      "captions": "no",
+      "stepFree": "unknown",
+      "signLanguage": "no",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-agents-in-production-panel",
+    "title": "AI Agents in Production: What Broke and What Held",
+    "description": "Three teams that shipped autonomous agents to real users compare notes on the incidents they would rather forget. Topics include runaway tool loops, prompt injection through retrieved documents, cost spikes and evaluation drift. The panel debates when a workflow beats an agent, how to scope tool permissions, and which guardrails survived contact with production traffic. Bring your hardest questions.",
+    "speakers": [
+      {
+        "name": "Priscila Albuquerque",
+        "role": "Staff Engineer",
+        "company": "Lumenforge"
+      },
+      {
+        "name": "Henrik Lindqvist-Roa",
+        "role": "Engineering Manager",
+        "company": "Nimbusary"
+      },
+      {
+        "name": "Amara Oyelaran",
+        "role": "ML Platform Lead",
+        "company": "Mangrove Data"
+      }
+    ],
+    "track": "AI & Agents",
+    "format": "Panel",
+    "level": "Intermediate",
+    "room": "Maracanã Hall",
+    "start": "2026-11-10T11:00:00-07:00",
+    "end": "2026-11-10T11:45:00-07:00",
+    "day": "2026-11-10",
+    "tags": [
+      "agents",
+      "llm",
+      "reliability",
+      "production",
+      "mcp"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-hybrid-search-elasticsearch",
+    "title": "Hybrid Search with Elasticsearch: Blending Keywords and Vectors",
+    "description": "Pure vector search misses exact part numbers, while pure keyword search misses intent. Rafaela shows how to combine BM25 and dense embeddings in Elasticsearch using reciprocal rank fusion, and how to tune weights with a small judged query set. We cover index design, embedding model trade-offs, latency budgets and a debugging workflow for answering why that result ranked first.",
+    "speakers": [
+      {
+        "name": "Rafaela Nogueira-Stahl",
+        "role": "Search Engineer",
+        "company": "Mangrove Data"
+      }
+    ],
+    "track": "Data & Search",
+    "format": "Talk",
+    "level": "Intermediate",
+    "room": "Ipanema Room",
+    "start": "2026-11-10T11:00:00-07:00",
+    "end": "2026-11-10T11:35:00-07:00",
+    "day": "2026-11-10",
+    "tags": [
+      "elasticsearch",
+      "vector-search",
+      "hybrid-search",
+      "relevance",
+      "embeddings"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-postgresql-on-kubernetes",
+    "title": "Running PostgreSQL on Kubernetes Without Losing Sleep",
+    "description": "Stateful workloads on Kubernetes have a reputation, and part of it is deserved. This talk covers operator choices, storage classes, replication topology, connection pooling and the failure modes we hit during a year of running PostgreSQL for a healthcare scheduling product. You will leave with a pre-flight checklist and a sober view of when a managed database is the better answer.",
+    "speakers": [
+      {
+        "name": "Joaquim Ferraz",
+        "role": "Database Reliability Engineer",
+        "company": "Ferroway"
+      }
+    ],
+    "track": "Data & Search",
+    "format": "Talk",
+    "level": "Intermediate",
+    "room": "Pelourinho Room",
+    "start": "2026-11-10T11:00:00-07:00",
+    "end": "2026-11-10T11:35:00-07:00",
+    "day": "2026-11-10",
+    "tags": [
+      "postgresql",
+      "kubernetes",
+      "operators",
+      "storage",
+      "high-availability"
+    ],
+    "accessibility": {
+      "captions": "no",
+      "stepFree": "unknown",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-k8s-security-beginners",
+    "title": "Kubernetes Security for Beginners: Locking the Front Door",
+    "description": "You do not need to be a security specialist to close the most common holes in a cluster. Beatriz explains RBAC, service accounts, pod security standards and secrets handling with small before-and-after manifests. By the end you will have a ten-item hardening checklist, know which defaults are dangerous, and understand how attackers usually get in through misconfiguration rather than exotic exploits.",
+    "speakers": [
+      {
+        "name": "Beatriz Aranha",
+        "role": "Security Engineer",
+        "company": "Garnetmoor"
+      }
+    ],
+    "track": "Security",
+    "format": "Talk",
+    "level": "Beginner",
+    "room": "Maracanã Hall",
+    "start": "2026-11-10T13:30:00-07:00",
+    "end": "2026-11-10T14:05:00-07:00",
+    "day": "2026-11-10",
+    "tags": [
+      "kubernetes",
+      "security",
+      "rbac",
+      "pod-security",
+      "beginners"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-opentelemetry-tracing-workshop",
+    "title": "Build a Tracing Pipeline with OpenTelemetry in 90 Minutes",
+    "description": "Instrument a three-service demo application, run an OpenTelemetry Collector, and follow a single request across process boundaries. You will add manual spans, propagate context through a message queue, sample intelligently, and export traces to an open-source backend. We close with a tour of common pitfalls such as broken context, high cardinality attributes and collectors that quietly drop data.",
+    "speakers": [
+      {
+        "name": "Kofi Mensah-Ruiz",
+        "role": "Observability Engineer",
+        "company": "Tidepool Works"
+      }
+    ],
+    "track": "Observability",
+    "format": "Workshop",
+    "level": "Intermediate",
+    "room": "Ipanema Room",
+    "start": "2026-11-10T13:30:00-07:00",
+    "end": "2026-11-10T15:00:00-07:00",
+    "day": "2026-11-10",
+    "tags": [
+      "opentelemetry",
+      "tracing",
+      "collector",
+      "instrumentation",
+      "workshop"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "yes"
+    }
+  },
+  {
+    "id": "s-accessibility-developer-tools",
+    "title": "Captions, Contrast, and Keyboards: Accessibility in Developer Tools",
+    "description": "Terminals, dashboards and documentation sites are used by developers with low vision, motor differences and screen readers, yet they are rarely tested that way. Yasmin demonstrates five accessibility failures in popular tooling patterns and shows quick fixes for each. You will learn how to audit a web UI in fifteen minutes, write meaningful alt text and keep keyboard navigation honest.",
+    "speakers": [
+      {
+        "name": "Yasmin Teixeira Dalmeida",
+        "role": "Accessibility Lead",
+        "company": "Brisa Digital"
+      }
+    ],
+    "track": "Community & Inclusion",
+    "format": "Talk",
+    "level": "Beginner",
+    "room": "Lapa Room",
+    "start": "2026-11-10T14:00:00-07:00",
+    "end": "2026-11-10T14:35:00-07:00",
+    "day": "2026-11-10",
+    "tags": [
+      "accessibility",
+      "a11y",
+      "developer-tools",
+      "inclusion",
+      "keyboard"
+    ],
+    "accessibility": {
+      "captions": "unknown",
+      "stepFree": "no",
+      "signLanguage": "yes",
+      "lowSensory": "yes"
+    }
+  },
+  {
+    "id": "s-cheapest-node",
+    "title": "The Cheapest Node Is the One You Never Started",
+    "description": "Cloud bills grow quietly, and Kubernetes makes it easy to hide waste behind abstractions. In fifteen minutes Ottoline covers resource requests, bin packing, idle namespaces and spot capacity, with real percentage savings from a mid-sized fleet. Leave with one query to run on Monday and a polite script for talking to teams about their overprovisioned deployments.",
+    "speakers": [
+      {
+        "name": "Ottoline Reyes-Brandt",
+        "role": "FinOps Practitioner",
+        "company": "Orbitwell"
+      }
+    ],
+    "track": "Kubernetes & Platform",
+    "format": "Lightning",
+    "level": "Beginner",
+    "room": "Pelourinho Room",
+    "start": "2026-11-10T14:00:00-07:00",
+    "end": "2026-11-10T14:15:00-07:00",
+    "day": "2026-11-10",
+    "tags": [
+      "finops",
+      "cost",
+      "kubernetes",
+      "autoscaling",
+      "rightsizing"
+    ],
+    "accessibility": {
+      "captions": "no",
+      "stepFree": "unknown",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-mentoring-open-source-newcomers",
+    "title": "Mentoring Open-Source Newcomers Without Burning Out Maintainers",
+    "description": "Good first issues are not enough, and maintainer time is finite. Thaís and Gustavo share a mentoring structure that turned first-time contributors into reviewers across two projects without doubling anyone workload. They cover issue triage templates, office hours, pairing etiquette and how to say no kindly. Bring a project you care about and sketch your own plan during the Q&A.",
+    "speakers": [
+      {
+        "name": "Thaís Villanueva",
+        "role": "Maintainer",
+        "company": "Sambaquí Tech"
+      },
+      {
+        "name": "Gustavo Ebert",
+        "role": "Community Manager",
+        "company": "Kestrel & Fen"
+      }
+    ],
+    "track": "Community & Inclusion",
+    "format": "Talk",
+    "level": "Beginner",
+    "room": "Maracanã Hall",
+    "start": "2026-11-10T15:30:00-07:00",
+    "end": "2026-11-10T16:05:00-07:00",
+    "day": "2026-11-10",
+    "tags": [
+      "open-source",
+      "mentoring",
+      "community",
+      "maintainers",
+      "onboarding"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-go-backends-first-spike",
+    "title": "Go Backends That Survive Their First Traffic Spike",
+    "description": "Your Go service passed every test and still fell over on launch day. Lucian reconstructs three outages caused by unbounded goroutines, missing timeouts and chatty database access, then shows the small changes that fixed them. Expect practical patterns for context cancellation, connection pools, load shedding and profiling with pprof, all illustrated with short code you can copy.",
+    "speakers": [
+      {
+        "name": "Lucian Marchetti-Ode",
+        "role": "Backend Engineer",
+        "company": "Plumeria Systems"
+      }
+    ],
+    "track": "Developer Experience",
+    "format": "Talk",
+    "level": "Intermediate",
+    "room": "Lapa Room",
+    "start": "2026-11-10T16:00:00-07:00",
+    "end": "2026-11-10T16:35:00-07:00",
+    "day": "2026-11-10",
+    "tags": [
+      "go",
+      "backend",
+      "performance",
+      "concurrency",
+      "api"
+    ],
+    "accessibility": {
+      "captions": "unknown",
+      "stepFree": "no",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-agents-need-guardrails",
+    "title": "Agents Need Guardrails: Designing Software Software Can Use",
+    "description": "As language models start calling our APIs, every interface becomes an interface for machines with unpredictable judgment. Marguerite argues for narrow tools, explicit budgets, reversible actions and audit trails, drawing on a year of deploying assistants inside enterprise systems. You will leave with a design vocabulary for agent-friendly services and a rubric for deciding what an agent should never be allowed to touch.",
+    "speakers": [
+      {
+        "name": "Marguerite Oyelowo-Paz",
+        "role": "Chief Architect",
+        "company": "Lumenforge"
+      }
+    ],
+    "track": "AI & Agents",
+    "format": "Keynote",
+    "level": "Intermediate",
+    "room": "Maracanã Hall",
+    "start": "2026-11-11T09:00:00-07:00",
+    "end": "2026-11-11T09:45:00-07:00",
+    "day": "2026-11-11",
+    "tags": [
+      "agents",
+      "guardrails",
+      "api-design",
+      "llm",
+      "safety"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "yes",
+      "lowSensory": "no"
+    }
+  },
+  {
+    "id": "s-mcp-servers-patterns",
+    "title": "Model Context Protocol Servers: Design Patterns and Pitfalls",
+    "description": "Exposing your service through the Model Context Protocol looks easy until a model starts calling it creatively. Anselmo covers tool granularity, schema design, pagination, authentication, error messages that models can actually act on, and testing with recorded conversations. You will see two reference servers built in Go and TypeScript and learn which anti-patterns inflate token costs.",
+    "speakers": [
+      {
+        "name": "Anselmo Duarte-Kim",
+        "role": "Software Engineer",
+        "company": "Nimbusary"
+      }
+    ],
+    "track": "AI & Agents",
+    "format": "Talk",
+    "level": "Intermediate",
+    "room": "Maracanã Hall",
+    "start": "2026-11-11T10:00:00-07:00",
+    "end": "2026-11-11T10:35:00-07:00",
+    "day": "2026-11-11",
+    "tags": [
+      "mcp",
+      "agents",
+      "tool-calling",
+      "api-design",
+      "integration"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-tracing-llm-calls",
+    "title": "Tracing LLM Calls: What to Capture and What to Redact",
+    "description": "Production AI features fail in ways that logs alone cannot explain: slow retrievals, silent fallbacks and prompts that drift. Odalys shows how to model model calls as spans with OpenTelemetry, which attributes help debugging, and how to redact personal data before it leaves the process. We also cover token cost metrics, sampling strategies and a dashboard layout for on-call engineers.",
+    "speakers": [
+      {
+        "name": "Odalys Fontaine",
+        "role": "Observability Engineer",
+        "company": "Harborlight"
+      }
+    ],
+    "track": "Observability",
+    "format": "Talk",
+    "level": "Intermediate",
+    "room": "Ipanema Room",
+    "start": "2026-11-11T10:00:00-07:00",
+    "end": "2026-11-11T10:35:00-07:00",
+    "day": "2026-11-11",
+    "tags": [
+      "llm",
+      "observability",
+      "opentelemetry",
+      "tracing",
+      "privacy"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-supply-chain-defense-workshop",
+    "title": "Supply Chain Defense: Signing, SBOMs, and Provenance Hands-On",
+    "description": "Build a container image, sign it, attach an SBOM, record provenance and enforce all three at admission time in a Kubernetes cluster. You will practice with open tooling in a guided lab, then simulate a poisoned dependency and see which controls catch it. The session ends with a prioritized roadmap for retrofitting these protections into an existing pipeline.",
+    "speakers": [
+      {
+        "name": "Radhika Pimentel",
+        "role": "Security Architect",
+        "company": "Garnetmoor"
+      },
+      {
+        "name": "Wendell Achterberg",
+        "role": "Release Engineer",
+        "company": "Ferroway"
+      }
+    ],
+    "track": "Security",
+    "format": "Workshop",
+    "level": "Intermediate",
+    "room": "Lapa Room",
+    "start": "2026-11-11T10:00:00-07:00",
+    "end": "2026-11-11T11:30:00-07:00",
+    "day": "2026-11-11",
+    "tags": [
+      "supply-chain",
+      "sbom",
+      "sigstore",
+      "provenance",
+      "ci",
+      "workshop"
+    ],
+    "accessibility": {
+      "captions": "unknown",
+      "stepFree": "no",
+      "signLanguage": "unknown",
+      "lowSensory": "yes"
+    }
+  },
+  {
+    "id": "s-precommit-hooks-tears",
+    "title": "Why Your Pre-Commit Hook Is Making Developers Cry",
+    "description": "A slow hook teaches people to bypass checks, and a bypassed check protects nobody. In fifteen minutes Cosima shows how to profile a local hook chain, move expensive work into CI, and keep only the checks that finish in under three seconds. Expect concrete numbers, a small benchmarking script and a humane policy for hook failures.",
+    "speakers": [
+      {
+        "name": "Cosima Abrantes",
+        "role": "Developer Experience Engineer",
+        "company": "Brisa Digital"
+      }
+    ],
+    "track": "Developer Experience",
+    "format": "Lightning",
+    "level": "Beginner",
+    "room": "Pelourinho Room",
+    "start": "2026-11-11T10:15:00-07:00",
+    "end": "2026-11-11T10:30:00-07:00",
+    "day": "2026-11-11",
+    "tags": [
+      "git",
+      "hooks",
+      "developer-experience",
+      "tooling",
+      "productivity"
+    ],
+    "accessibility": {
+      "captions": "no",
+      "stepFree": "unknown",
+      "signLanguage": "no",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-cost-is-a-feature-panel",
+    "title": "Cost Is a Feature: FinOps Stories from Kubernetes Fleets",
+    "description": "Three practitioners describe how they made cloud spend visible without slowing teams down. They compare showback and chargeback, tagging discipline, autoscaler tuning, commitment purchases and the cultural friction of cost conversations. Hear what saved real money, what backfired, and how to pitch efficiency work to leadership who only want new features. Audience questions drive the second half.",
+    "speakers": [
+      {
+        "name": "Emeka Barreto",
+        "role": "Infrastructure Director",
+        "company": "Orbitwell"
+      },
+      {
+        "name": "Solveig Marques",
+        "role": "FinOps Lead",
+        "company": "Caatinga Cloud"
+      },
+      {
+        "name": "Pradeep Lindgren-Souza",
+        "role": "Staff SRE",
+        "company": "Tidepool Works"
+      }
+    ],
+    "track": "Kubernetes & Platform",
+    "format": "Panel",
+    "level": "Intermediate",
+    "room": "Maracanã Hall",
+    "start": "2026-11-11T11:00:00-07:00",
+    "end": "2026-11-11T11:45:00-07:00",
+    "day": "2026-11-11",
+    "tags": [
+      "finops",
+      "cost",
+      "kubernetes",
+      "platform",
+      "showback"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-ai-sre-triage-pager",
+    "title": "AI SRE: Letting a Model Triage Your Pager",
+    "description": "We gave a language model read-only access to metrics, traces and runbooks and let it draft first responses to pages for six months. Fiorella reports hit rates, hallucinated root causes, near misses and the evaluation harness that kept us honest. You will learn how to scope permissions, structure runbooks for machine reading, and decide when a human must stay in the loop.",
+    "speakers": [
+      {
+        "name": "Fiorella Camacho-Weiss",
+        "role": "Principal SRE",
+        "company": "Nimbusary"
+      }
+    ],
+    "track": "AI & Agents",
+    "format": "Talk",
+    "level": "Advanced",
+    "room": "Ipanema Room",
+    "start": "2026-11-11T11:00:00-07:00",
+    "end": "2026-11-11T11:35:00-07:00",
+    "day": "2026-11-11",
+    "tags": [
+      "ai-sre",
+      "incident-response",
+      "llm",
+      "on-call",
+      "automation"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-semantic-search-support-docs",
+    "title": "Semantic Search for Support Docs: Lessons from a RAG Rewrite",
+    "description": "Our support bot answered confidently and wrongly until we rebuilt retrieval from scratch. Matilda explains chunking strategies, metadata filters, embedding choices and the simple evaluation set that exposed the real problems. Beginners will learn how retrieval-augmented generation works end to end, with a minimal Python example and a list of mistakes that waste weeks.",
+    "speakers": [
+      {
+        "name": "Matilda Osei-Granger",
+        "role": "Product Engineer",
+        "company": "Plumeria Systems"
+      }
+    ],
+    "track": "Data & Search",
+    "format": "Talk",
+    "level": "Beginner",
+    "room": "Pelourinho Room",
+    "start": "2026-11-11T11:00:00-07:00",
+    "end": "2026-11-11T11:35:00-07:00",
+    "day": "2026-11-11",
+    "tags": [
+      "rag",
+      "semantic-search",
+      "embeddings",
+      "documentation",
+      "retrieval"
+    ],
+    "accessibility": {
+      "captions": "no",
+      "stepFree": "unknown",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-golden-paths-cages",
+    "title": "Internal Developer Platforms: Golden Paths Versus Golden Cages",
+    "description": "A golden path accelerates teams, while a golden cage punishes anyone who needs something different. Dimitri shares telemetry from an internal developer platform with four hundred services, showing where escape hatches were used and why. We discuss templates, scorecards, self-service infrastructure and the governance model that let platform engineers say yes more often than no.",
+    "speakers": [
+      {
+        "name": "Dimitri Aragão",
+        "role": "Head of Developer Platforms",
+        "company": "Quartzline"
+      }
+    ],
+    "track": "Developer Experience",
+    "format": "Talk",
+    "level": "Intermediate",
+    "room": "Maracanã Hall",
+    "start": "2026-11-11T13:30:00-07:00",
+    "end": "2026-11-11T14:05:00-07:00",
+    "day": "2026-11-11",
+    "tags": [
+      "internal-developer-platform",
+      "golden-paths",
+      "backstage",
+      "platform-engineering",
+      "devex"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-argo-cd-applicationsets-multicluster",
+    "title": "GitOps Multi-Cluster Rollouts with Argo CD ApplicationSets",
+    "description": "Manage forty clusters from one repository without copy-paste. In this workshop you generate Applications with ApplicationSets, build a progressive rollout across rings, handle secrets per environment, and practice recovery when a bad change reaches a canary cluster. Prior Argo CD experience is expected, and we spend most of the time debugging realistic failures together.",
+    "speakers": [
+      {
+        "name": "Benedita Souza-Lang",
+        "role": "Cloud Architect",
+        "company": "Caatinga Cloud"
+      }
+    ],
+    "track": "Kubernetes & Platform",
+    "format": "Workshop",
+    "level": "Advanced",
+    "room": "Ipanema Room",
+    "start": "2026-11-11T13:30:00-07:00",
+    "end": "2026-11-11T15:00:00-07:00",
+    "day": "2026-11-11",
+    "tags": [
+      "gitops",
+      "argo-cd",
+      "multi-cluster",
+      "applicationsets",
+      "progressive-delivery",
+      "workshop"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "yes"
+    }
+  },
+  {
+    "id": "s-ai-pair-code-review",
+    "title": "Reviewing Pull Requests with an AI Pair, Without Losing Your Judgment",
+    "description": "Automated review bots can catch bugs, but they can also flood reviewers with noise and teach teams to ignore comments. Tobias presents data from eight months of an AI reviewer integrated into continuous integration, including precision by comment type. You will learn how to configure severity, keep humans accountable and measure whether review quality improves.",
+    "speakers": [
+      {
+        "name": "Tobias Cordeiro-Fry",
+        "role": "Engineering Manager",
+        "company": "Lumenforge"
+      }
+    ],
+    "track": "Developer Experience",
+    "format": "Talk",
+    "level": "Intermediate",
+    "room": "Lapa Room",
+    "start": "2026-11-11T14:00:00-07:00",
+    "end": "2026-11-11T14:35:00-07:00",
+    "day": "2026-11-11",
+    "tags": [
+      "code-review",
+      "ai",
+      "ci",
+      "pull-requests",
+      "automation"
+    ],
+    "accessibility": {
+      "captions": "unknown",
+      "stepFree": "no",
+      "signLanguage": "no",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-first-conference-talk-kit",
+    "title": "Your First Conference Talk: A 15-Minute Survival Kit",
+    "description": "Nervous about submitting a proposal? Zuleica shares a practical kit built from coaching thirty first-time speakers: writing an abstract that gets accepted, structuring twenty minutes of content, taming slides and rehearsing without a mirror. She also covers handling live demo failures and awkward questions. Bring the half-formed idea in your notes app.",
+    "speakers": [
+      {
+        "name": "Zuleica Montenegro",
+        "role": "Developer Advocate",
+        "company": "Sambaquí Tech"
+      }
+    ],
+    "track": "Community & Inclusion",
+    "format": "Lightning",
+    "level": "Beginner",
+    "room": "Pelourinho Room",
+    "start": "2026-11-11T14:00:00-07:00",
+    "end": "2026-11-11T14:15:00-07:00",
+    "day": "2026-11-11",
+    "tags": [
+      "speaking",
+      "community",
+      "career",
+      "beginners",
+      "mentoring"
+    ],
+    "accessibility": {
+      "captions": "no",
+      "stepFree": "unknown",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-wasm-plugins-platform-teams",
+    "title": "WebAssembly Plugins for Platform Teams: Sandboxed Extensions",
+    "description": "Letting teams extend a gateway or controller usually means running untrusted code in your trusted process. Gwendolyn shows how WebAssembly modules compiled from Rust and Go give you capability-based sandboxing, predictable startup and language freedom. We examine host interface design, resource limits, versioning and the performance numbers from replacing a sidecar fleet with in-process plugins.",
+    "speakers": [
+      {
+        "name": "Gwendolyn Tavares-Ito",
+        "role": "Runtime Engineer",
+        "company": "Ferroway"
+      }
+    ],
+    "track": "Kubernetes & Platform",
+    "format": "Talk",
+    "level": "Advanced",
+    "room": "Maracanã Hall",
+    "start": "2026-11-11T15:30:00-07:00",
+    "end": "2026-11-11T16:05:00-07:00",
+    "day": "2026-11-11",
+    "tags": [
+      "webassembly",
+      "wasm",
+      "plugins",
+      "rust",
+      "sandboxing",
+      "platform"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-threat-modeling-ci",
+    "title": "Threat Modeling Your CI Pipeline",
+    "description": "Your build system holds the keys to production, yet it rarely gets a security review. Ezequiel walks through a lightweight threat modeling session for a typical pipeline, covering runner isolation, secrets exposure, pull request triggers and third-party actions. You will practice on a sample workflow, leave with a reusable worksheet and learn the quick wins that remove entire attack classes.",
+    "speakers": [
+      {
+        "name": "Ezequiel Carvalho-Moore",
+        "role": "Application Security Engineer",
+        "company": "Garnetmoor"
+      }
+    ],
+    "track": "Security",
+    "format": "Talk",
+    "level": "Intermediate",
+    "room": "Lapa Room",
+    "start": "2026-11-11T16:00:00-07:00",
+    "end": "2026-11-11T16:35:00-07:00",
+    "day": "2026-11-11",
+    "tags": [
+      "appsec",
+      "ci",
+      "threat-modeling",
+      "pipelines",
+      "secrets"
+    ],
+    "accessibility": {
+      "captions": "unknown",
+      "stepFree": "no",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-open-source-community-before-license",
+    "title": "Open Source Is a Community Before It Is a License",
+    "description": "Licenses decide what you may do, but people decide whether a project survives. Aurélio draws on fifteen years of maintaining and abandoning projects to describe the unglamorous work that keeps communities alive: governance, kindness, documentation and sustainable funding. The keynote closes with a call to action for companies that depend on volunteers and a short guide for newcomers wanting to start.",
+    "speakers": [
+      {
+        "name": "Aurélio Nascimento-Park",
+        "role": "Founder",
+        "company": "Sambaquí Tech"
+      }
+    ],
+    "track": "Community & Inclusion",
+    "format": "Keynote",
+    "level": "Beginner",
+    "room": "Maracanã Hall",
+    "start": "2026-11-12T09:00:00-07:00",
+    "end": "2026-11-12T09:45:00-07:00",
+    "day": "2026-11-12",
+    "tags": [
+      "open-source",
+      "community",
+      "governance",
+      "maintainers",
+      "inclusion"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "yes",
+      "lowSensory": "no"
+    }
+  },
+  {
+    "id": "s-kernel-tracing-low-overhead",
+    "title": "Kernel-Level Tracing at Scale: Cutting Overhead in eBPF Collectors",
+    "description": "Running eBPF collectors on ten thousand nodes exposes costs that lab benchmarks hide. Cassiano covers ring buffer tuning, map sizing, in-kernel aggregation, sampling and the verifier limits that shape program design. We look at flame graphs of collector overhead before and after optimization, and share a methodology for deciding which events deserve kernel-side filtering. Familiarity with C or Rust helps.",
+    "speakers": [
+      {
+        "name": "Cassiano Wirth",
+        "role": "Performance Engineer",
+        "company": "Quartzline"
+      }
+    ],
+    "track": "Observability",
+    "format": "Talk",
+    "level": "Advanced",
+    "room": "Maracanã Hall",
+    "start": "2026-11-12T10:00:00-07:00",
+    "end": "2026-11-12T10:35:00-07:00",
+    "day": "2026-11-12",
+    "tags": [
+      "ebpf",
+      "performance",
+      "tracing",
+      "collectors",
+      "linux",
+      "observability"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-platform-engineering-teams-of-five",
+    "title": "Platform Engineering for Teams of Five",
+    "description": "You do not need a hundred engineers and a custom portal to have a platform. Noemi describes what a five-person team can reasonably standardize: a deployment template, one observability stack, sensible defaults and a short onboarding document. We discuss what to buy versus build, which Kubernetes features to postpone and how to know when your platform needs to grow.",
+    "speakers": [
+      {
+        "name": "Noemi Schaeffer-Lima",
+        "role": "Founding Engineer",
+        "company": "Tidepool Works"
+      }
+    ],
+    "track": "Kubernetes & Platform",
+    "format": "Talk",
+    "level": "Beginner",
+    "room": "Ipanema Room",
+    "start": "2026-11-12T10:00:00-07:00",
+    "end": "2026-11-12T10:35:00-07:00",
+    "day": "2026-11-12",
+    "tags": [
+      "platform-engineering",
+      "startups",
+      "kubernetes",
+      "simplicity",
+      "tooling"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-agentic-incident-responder-workshop",
+    "title": "Build an Agentic Incident Responder with Runbooks and MCP",
+    "description": "Build a working incident helper that reads alerts, queries metrics through MCP servers, follows a runbook and proposes remediation steps for human approval. You will define tools, write evaluation scenarios, add safety limits and replay a simulated outage. The lab uses open models and a sample cluster, so no paid accounts are needed. Expect to leave with a repository you can adapt.",
+    "speakers": [
+      {
+        "name": "Valentina Orsini-Ribeiro",
+        "role": "Staff SRE",
+        "company": "Harborlight"
+      },
+      {
+        "name": "Kwabena Lowe",
+        "role": "AI Engineer",
+        "company": "Lumenforge"
+      }
+    ],
+    "track": "AI & Agents",
+    "format": "Workshop",
+    "level": "Intermediate",
+    "room": "Lapa Room",
+    "start": "2026-11-12T10:00:00-07:00",
+    "end": "2026-11-12T11:30:00-07:00",
+    "day": "2026-11-12",
+    "tags": [
+      "agents",
+      "mcp",
+      "incident-response",
+      "ai-sre",
+      "runbooks",
+      "workshop"
+    ],
+    "accessibility": {
+      "captions": "unknown",
+      "stepFree": "no",
+      "signLanguage": "unknown",
+      "lowSensory": "yes"
+    }
+  },
+  {
+    "id": "s-network-policies-gentle",
+    "title": "A Gentle Introduction to Network Policies",
+    "description": "By default every pod can talk to every other pod, which is convenient and alarming. In fifteen minutes Luzia demonstrates deny-by-default policies, namespace isolation and egress controls using diagrams and five short manifests. You will learn how to test policies safely, avoid locking yourself out and roll the pattern out across an existing cluster one team at a time.",
+    "speakers": [
+      {
+        "name": "Luzia Prado",
+        "role": "Cloud Engineer",
+        "company": "Ferroway"
+      }
+    ],
+    "track": "Security",
+    "format": "Lightning",
+    "level": "Beginner",
+    "room": "Pelourinho Room",
+    "start": "2026-11-12T10:15:00-07:00",
+    "end": "2026-11-12T10:30:00-07:00",
+    "day": "2026-11-12",
+    "tags": [
+      "network-policy",
+      "kubernetes",
+      "security",
+      "zero-trust",
+      "beginners"
+    ],
+    "accessibility": {
+      "captions": "no",
+      "stepFree": "unknown",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-welcoming-conferences-code-panel",
+    "title": "Making Conferences and Code Welcoming for Everyone",
+    "description": "Organizers and accessibility specialists discuss what actually makes an event or repository welcoming: captioning, step-free venues, quiet spaces, clear codes of conduct and responsive moderation. Panelists share failures from past events, the budget conversations behind improvements and simple changes any maintainer can make today. The audience is invited to contribute practices that worked in their own communities.",
+    "speakers": [
+      {
+        "name": "Itzel Barbosa-Hale",
+        "role": "Inclusion Program Lead",
+        "company": "Brisa Digital"
+      },
+      {
+        "name": "Mateus Quispe",
+        "role": "Organizer",
+        "company": "Sambaquí Tech"
+      },
+      {
+        "name": "Naledi Armstrong-Dias",
+        "role": "Accessibility Consultant",
+        "company": "Kestrel & Fen"
+      }
+    ],
+    "track": "Community & Inclusion",
+    "format": "Panel",
+    "level": "Beginner",
+    "room": "Maracanã Hall",
+    "start": "2026-11-12T11:00:00-07:00",
+    "end": "2026-11-12T11:45:00-07:00",
+    "day": "2026-11-12",
+    "tags": [
+      "inclusion",
+      "accessibility",
+      "conferences",
+      "community",
+      "code-of-conduct"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-evaluating-rag-retrieval",
+    "title": "Evaluating RAG: Measuring Retrieval Before Blaming the Model",
+    "description": "When a retrieval-augmented system gives wrong answers, teams usually tweak prompts and ignore the index. Henriette presents a measurement-first approach: build judged query sets, track recall at k, inspect chunk boundaries and test rerankers separately from generation. We cover offline and online evaluation, drift detection and cost trade-offs, with examples on both Elasticsearch and PostgreSQL with pgvector.",
+    "speakers": [
+      {
+        "name": "Henriette Salazar-Boyd",
+        "role": "Applied Scientist",
+        "company": "Mangrove Data"
+      }
+    ],
+    "track": "Data & Search",
+    "format": "Talk",
+    "level": "Advanced",
+    "room": "Ipanema Room",
+    "start": "2026-11-12T11:00:00-07:00",
+    "end": "2026-11-12T11:35:00-07:00",
+    "day": "2026-11-12",
+    "tags": [
+      "rag",
+      "evaluation",
+      "retrieval",
+      "embeddings",
+      "vector-search",
+      "metrics"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-go-concurrency-event-driven",
+    "title": "Go Concurrency Patterns for Event-Driven Backends",
+    "description": "Channels are elegant until a consumer stalls and the whole pipeline backs up. Anders walks through worker pools, bounded queues, fan-in, graceful shutdown and idempotent handlers for a healthcare scheduling backend processing appointment events. Each pattern comes with a failure story, a short Go snippet and a test that reproduces the bug, so you can recognize the same trouble in your own services.",
+    "speakers": [
+      {
+        "name": "Anders Moreira-Chukwu",
+        "role": "Senior Backend Engineer",
+        "company": "Plumeria Systems"
+      }
+    ],
+    "track": "Developer Experience",
+    "format": "Talk",
+    "level": "Intermediate",
+    "room": "Pelourinho Room",
+    "start": "2026-11-12T11:00:00-07:00",
+    "end": "2026-11-12T11:35:00-07:00",
+    "day": "2026-11-12",
+    "tags": [
+      "go",
+      "concurrency",
+      "event-driven",
+      "messaging",
+      "backend"
+    ],
+    "accessibility": {
+      "captions": "no",
+      "stepFree": "unknown",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-secrets-sigstore-forgotten-dependency",
+    "title": "Secrets, Sigstore, and the Dependency You Forgot",
+    "description": "Transitive dependencies and long-lived credentials create quiet paths into production. Teodora dissects a simulated breach that began with an abandoned package and ended with leaked cloud keys, then maps each step to a control: keyless signing, short-lived tokens, dependency pinning and anomaly detection on build behavior. Advanced attendees will appreciate the gritty trade-offs and adoption metrics.",
+    "speakers": [
+      {
+        "name": "Teodora Valcárcel",
+        "role": "Principal Security Engineer",
+        "company": "Garnetmoor"
+      }
+    ],
+    "track": "Security",
+    "format": "Talk",
+    "level": "Advanced",
+    "room": "Maracanã Hall",
+    "start": "2026-11-12T13:30:00-07:00",
+    "end": "2026-11-12T14:05:00-07:00",
+    "day": "2026-11-12",
+    "tags": [
+      "supply-chain",
+      "sigstore",
+      "secrets",
+      "dependencies",
+      "appsec"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-postgres-backups-failover-workshop",
+    "title": "Postgres Backups, Failover, and Restore Drills on Kubernetes",
+    "description": "A backup you have never restored is only a hope. In this workshop you deploy a PostgreSQL cluster with an operator, configure continuous archiving, kill the primary, promote a replica and restore to a point in time. We measure recovery time, discuss replication lag and write a drill schedule your team can actually keep. Comfort with kubectl and basic SQL is assumed.",
+    "speakers": [
+      {
+        "name": "Raimundo Ellison-Teixeira",
+        "role": "Database Reliability Engineer",
+        "company": "Ferroway"
+      }
+    ],
+    "track": "Data & Search",
+    "format": "Workshop",
+    "level": "Advanced",
+    "room": "Ipanema Room",
+    "start": "2026-11-12T13:30:00-07:00",
+    "end": "2026-11-12T15:00:00-07:00",
+    "day": "2026-11-12",
+    "tags": [
+      "postgresql",
+      "backups",
+      "failover",
+      "kubernetes",
+      "disaster-recovery",
+      "workshop"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "yes"
+    }
+  },
+  {
+    "id": "s-alert-fatigue-to-signal",
+    "title": "From Alert Fatigue to Signal: Redesigning On-Call",
+    "description": "Pages at three in the morning for problems nobody can fix are a cultural bug, not a technical one. Marcelina describes how one team cut pages by seventy percent by moving to symptom-based alerts, burn rate thresholds and clear ownership. You will leave with a worksheet for auditing your alerts, a template for post-incident reviews and a sustainable rotation model.",
+    "speakers": [
+      {
+        "name": "Marcelina Dutra-Quinn",
+        "role": "Reliability Coach",
+        "company": "Tidepool Works"
+      }
+    ],
+    "track": "Observability",
+    "format": "Talk",
+    "level": "Beginner",
+    "room": "Lapa Room",
+    "start": "2026-11-12T14:00:00-07:00",
+    "end": "2026-11-12T14:35:00-07:00",
+    "day": "2026-11-12",
+    "tags": [
+      "alerting",
+      "on-call",
+      "slo",
+      "incident-response",
+      "burnout"
+    ],
+    "accessibility": {
+      "captions": "unknown",
+      "stepFree": "no",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-interpreters-etiquette-hosts",
+    "title": "Sign Language Interpreters and You: Practical Etiquette for Hosts",
+    "description": "Working with sign language interpreters is a skill that speakers and organizers rarely get taught. Rosalind covers booking, sharing slides in advance, pacing, positioning, sightlines and how to handle live questions so that deaf attendees are fully included. Fifteen minutes of concrete etiquette that will change how you host, present and plan your next session.",
+    "speakers": [
+      {
+        "name": "Rosalind Peixoto",
+        "role": "Events Producer",
+        "company": "Brisa Digital"
+      }
+    ],
+    "track": "Community & Inclusion",
+    "format": "Lightning",
+    "level": "Beginner",
+    "room": "Pelourinho Room",
+    "start": "2026-11-12T14:00:00-07:00",
+    "end": "2026-11-12T14:15:00-07:00",
+    "day": "2026-11-12",
+    "tags": [
+      "accessibility",
+      "sign-language",
+      "events",
+      "inclusion",
+      "speaking"
+    ],
+    "accessibility": {
+      "captions": "no",
+      "stepFree": "unknown",
+      "signLanguage": "yes",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-ai-assisted-ci-speedups",
+    "title": "Speeding Up CI: Caching, Sharding, and AI-Assisted Test Selection",
+    "description": "Our pipeline took forty minutes and nobody trusted it. Florian explains how caching layers, test sharding and a machine-learned test selector brought median time to nine minutes, and how we proved the selector did not skip important tests. Expect honest measurements, a flaky test quarantine process and advice on when AI helps with continuous integration and when it only adds complexity.",
+    "speakers": [
+      {
+        "name": "Florian Amadi-Ross",
+        "role": "CI Platform Engineer",
+        "company": "Orbitwell"
+      }
+    ],
+    "track": "Developer Experience",
+    "format": "Talk",
+    "level": "Intermediate",
+    "room": "Maracanã Hall",
+    "start": "2026-11-12T15:30:00-07:00",
+    "end": "2026-11-12T16:05:00-07:00",
+    "day": "2026-11-12",
+    "tags": [
+      "ci",
+      "testing",
+      "caching",
+      "ai",
+      "build-performance"
+    ],
+    "accessibility": {
+      "captions": "yes",
+      "stepFree": "yes",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  },
+  {
+    "id": "s-observing-autonomous-agents",
+    "title": "Observing Autonomous Agents: Spans, Costs, and Loops",
+    "description": "Agents plan, call tools and revise their own work, which makes ordinary request tracing inadequate. Isadora proposes a span model for multi-step reasoning, metrics for loop detection and token spend, and replayable traces for debugging failures. We cover privacy, sampling and building alerts that catch an agent stuck in a loop before the invoice arrives. Experience with tracing systems is assumed.",
+    "speakers": [
+      {
+        "name": "Isadora Kwiatkowski",
+        "role": "Principal Engineer",
+        "company": "Nimbusary"
+      }
+    ],
+    "track": "AI & Agents",
+    "format": "Talk",
+    "level": "Advanced",
+    "room": "Lapa Room",
+    "start": "2026-11-12T16:00:00-07:00",
+    "end": "2026-11-12T16:35:00-07:00",
+    "day": "2026-11-12",
+    "tags": [
+      "agents",
+      "observability",
+      "llm",
+      "opentelemetry",
+      "cost",
+      "evaluation"
+    ],
+    "accessibility": {
+      "captions": "unknown",
+      "stepFree": "no",
+      "signLanguage": "unknown",
+      "lowSensory": "unknown"
+    }
+  }
+]

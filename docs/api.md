@@ -15,8 +15,12 @@ Every non-2xx JSON response has this shape:
 { "error": { "code": "bad_request", "message": "Human readable sentence." } }
 ```
 
-Codes: `bad_request` (400), `not_found` (404), `ask_unavailable` (503),
-`search_unavailable` (503), `internal` (500).
+Codes: `bad_request` (400), `forbidden` (403), `not_found` (404),
+`ask_unavailable` (503), `search_unavailable` (503), `internal` (500).
+
+Every 503 carries a `Retry-After` header in seconds. A 503 is short-lived
+(the index is warming up after a restart, or a dependency hiccuped), so
+clients should retry once after that delay before showing an error.
 
 ## Shared types
 
@@ -89,7 +93,7 @@ type Person = {
   };
   features: { ask: boolean };
   rum: { endpoint: string; token: string; serviceName: string } | null;
-  chaos: { mode: "off" | "n-plus-one" };
+  chaos: { mode: "off" | "n-plus-one"; protected: boolean };  // protected => POST needs X-Ops-Token
 }
 ```
 
@@ -153,6 +157,13 @@ sessions.
 
 ### `GET /api/chaos` and `POST /api/chaos`
 Body for POST: `{ "mode": "off" | "n-plus-one" }`. Returns `{ "mode": ... }`.
+
+`GET` is public. `POST` degrades search for everyone, so on every deployed
+environment it requires the header `X-Ops-Token` with the shared ops token;
+a missing or wrong token is `403 forbidden`. `meta.chaos.protected` tells the
+frontend whether to ask for the token. Local development (no token
+configured, `DEPLOY_ENV` unset) leaves it open.
+
 `n-plus-one` makes search enrich each hit with its own sequential
 Elasticsearch query instead of one batched query. It is a real regression,
 not a sleep, and exists to practice incident response.

@@ -1,0 +1,158 @@
+kind: Dashboard
+metadata:
+  name: samba-stack-overflow-search-health
+  project: default
+spec:
+  display:
+    name: "Samba Stack Overflow: search health"
+    description: Search traffic, latency, Elasticsearch round trips, zero-result searches and HTTP errors for samba-stack-overflow.
+  duration: 1h
+  panels:
+    searchRequestRate:
+      kind: Panel
+      spec:
+        display:
+          name: Search request rate by outcome
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            yAxis:
+              format:
+                unit: requests/sec
+            legend:
+              position: bottom
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: 'sum by (samba_search_outcome) (rate({otel_metric_name="samba.search.requests", service_name="samba-stack-overflow"}[$__rate_interval]))'
+                  seriesNameFormat: "{{samba_search_outcome}}"
+    searchDuration:
+      kind: Panel
+      spec:
+        display:
+          name: Search duration (p50, p95)
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            yAxis:
+              format:
+                unit: milliseconds
+            legend:
+              position: bottom
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: 'histogram_quantile(0.50, sum by (le) (rate({otel_metric_name="samba.search.duration", service_name="samba-stack-overflow"}[$__rate_interval])))'
+                  seriesNameFormat: p50
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: 'histogram_quantile(0.95, sum by (le) (rate({otel_metric_name="samba.search.duration", service_name="samba-stack-overflow"}[$__rate_interval])))'
+                  seriesNameFormat: p95
+    esRoundTrips:
+      kind: Panel
+      spec:
+        display:
+          name: Elasticsearch round trips per search (p95) by enrichment strategy
+          description: N+1 detector. Should stay at 4; jumps when enrichment turns sequential.
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            yAxis:
+              format:
+                unit: decimal
+            legend:
+              position: bottom
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: 'histogram_quantile(0.95, sum by (le, samba_enrich_strategy) (rate({otel_metric_name="samba.search.es_round_trips", service_name="samba-stack-overflow"}[$__rate_interval])))'
+                  seriesNameFormat: "{{samba_enrich_strategy}} p95"
+    zeroResultSearches:
+      kind: Panel
+      spec:
+        display:
+          name: Zero-result searches per minute
+          description: Counted from samba.search spans with samba.search.results = 0; the service reports no zero-results metric.
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            yAxis:
+              format:
+                unit: decimal
+            legend:
+              position: bottom
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: 'sum(rate({otel_metric_name="dash0.spans", service_name="samba-stack-overflow", otel_span_name="samba.search", samba_search_results="0"}[$__rate_interval])) * 60 or vector(0)'
+                  seriesNameFormat: Zero-result searches/min
+    httpErrorRate:
+      kind: Panel
+      spec:
+        display:
+          name: HTTP server error rate (5xx)
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            yAxis:
+              format:
+                unit: percent-decimal
+            legend:
+              position: bottom
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: 'sum(histogram_count(rate({otel_metric_name="http.server.request.duration", service_name="samba-stack-overflow", http_response_status_code=~"5.."}[$__rate_interval]))) / sum(histogram_count(rate({otel_metric_name="http.server.request.duration", service_name="samba-stack-overflow"}[$__rate_interval])))'
+                  seriesNameFormat: 5xx error rate
+  layouts:
+    - kind: Grid
+      spec:
+        items:
+          - x: 0
+            y: 0
+            width: 12
+            height: 6
+            content:
+              $ref: "#/spec/panels/searchRequestRate"
+          - x: 12
+            y: 0
+            width: 12
+            height: 6
+            content:
+              $ref: "#/spec/panels/searchDuration"
+          - x: 0
+            y: 6
+            width: 12
+            height: 6
+            content:
+              $ref: "#/spec/panels/esRoundTrips"
+          - x: 12
+            y: 6
+            width: 12
+            height: 6
+            content:
+              $ref: "#/spec/panels/zeroResultSearches"
+          - x: 0
+            y: 12
+            width: 24
+            height: 6
+            content:
+              $ref: "#/spec/panels/httpErrorRate"

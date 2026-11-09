@@ -12,4 +12,4 @@ resources:
 images:
   - name: app
     newName: ghcr.io/eduardovpessoa/samba-stack-overflow
-    newTag: 1c322ff
+    newTag: 29b019c

@@ -1,0 +1,272 @@
+[
+  {
+    "id": "p-01",
+    "name": "Camila Rezende-Hayes",
+    "role": "Backend Engineer",
+    "company": "Medvale Health Tech",
+    "building": "I'm building an AI-powered healthcare scheduling platform using Go, Kubernetes, and PostgreSQL. Right now I'm fighting double-bookings caused by retried events during failovers.",
+    "interests": [
+      "go",
+      "kubernetes",
+      "postgresql",
+      "healthcare",
+      "event-driven"
+    ],
+    "lookingFor": "Database reliability engineers who have run PostgreSQL operators in production."
+  },
+  {
+    "id": "p-02",
+    "name": "Thiago Albuquerque-Nkemelu",
+    "role": "Staff Engineer",
+    "company": "Pagueira Financial",
+    "building": "I'm building a real-time payments reconciliation engine in Rust and Kafka for small banks. I'm trying to make audit trails tamper-evident without slowing settlement.",
+    "interests": [
+      "fintech",
+      "rust",
+      "kafka",
+      "security",
+      "compliance"
+    ],
+    "lookingFor": "Security engineers with experience in supply chain signing and audit logging."
+  },
+  {
+    "id": "p-03",
+    "name": "Wanjiru Delacroix",
+    "role": "Product Engineer",
+    "company": "Lousa Learning",
+    "building": "I'm building an adaptive tutoring app for high school math with TypeScript, Python and Elasticsearch. I'm experimenting with hybrid search to match students to practice problems.",
+    "interests": [
+      "edtech",
+      "elasticsearch",
+      "search",
+      "typescript",
+      "personalization"
+    ],
+    "lookingFor": "Search engineers who can critique my relevance tuning approach."
+  },
+  {
+    "id": "p-04",
+    "name": "Joana Prestes",
+    "role": "Observability Engineer",
+    "company": "Tidepool Works",
+    "building": "I'm building an open-source trace explorer on OpenTelemetry and ClickHouse. I am focused on making high-cardinality queries fast enough for real incident response.",
+    "interests": [
+      "opentelemetry",
+      "observability",
+      "clickhouse",
+      "tracing",
+      "open-source"
+    ],
+    "lookingFor": "Maintainers of collectors and exporters who want to compare notes on performance."
+  },
+  {
+    "id": "p-05",
+    "name": "Gaspar Whitlock-Okafor",
+    "role": "AI Engineer",
+    "company": "Lumenforge",
+    "building": "I'm building a customer-support agent that uses MCP servers to look up orders and issue refunds. I'm stuck on permission scoping and evaluating tool calls before release.",
+    "interests": [
+      "agents",
+      "mcp",
+      "llm",
+      "evaluation",
+      "guardrails"
+    ],
+    "lookingFor": "Anyone who has shipped agents with write access to real systems."
+  },
+  {
+    "id": "p-06",
+    "name": "Sunniva Albers-Mota",
+    "role": "Search Engineer",
+    "company": "Mangrove Data",
+    "building": "I'm building a RAG product that answers questions over internal engineering documentation with Elasticsearch and pgvector. I'm obsessed with measuring retrieval quality before touching prompts.",
+    "interests": [
+      "rag",
+      "search",
+      "vector-search",
+      "evaluation",
+      "embeddings"
+    ],
+    "lookingFor": "Practitioners who have built judged query sets and want to swap tips."
+  },
+  {
+    "id": "p-07",
+    "name": "Rodrigo Tabajara",
+    "role": "Security Engineer",
+    "company": "Garnetmoor",
+    "building": "I'm building a policy engine that blocks unsigned container images at Kubernetes admission using Sigstore and OPA. I'm looking at ways to make rollout painless for application teams.",
+    "interests": [
+      "security",
+      "supply-chain",
+      "sigstore",
+      "kubernetes",
+      "policy"
+    ],
+    "lookingFor": "Platform teams willing to pilot admission policies and share adoption lessons."
+  },
+  {
+    "id": "p-08",
+    "name": "Esperanza Liu-Barros",
+    "role": "Accessibility Engineer",
+    "company": "Brisa Digital",
+    "building": "I'm building an accessibility linter for developer dashboards that checks keyboard flows and screen reader names. I'm writing it in TypeScript with Playwright and need real-world test cases.",
+    "interests": [
+      "accessibility",
+      "a11y",
+      "typescript",
+      "testing",
+      "developer-tools"
+    ],
+    "lookingFor": "Developers who use assistive technology and would test my tool."
+  },
+  {
+    "id": "p-09",
+    "name": "Ibrahim Sorensen-Lima",
+    "role": "Game Backend Developer",
+    "company": "Quokka Arcade",
+    "building": "I'm building a matchmaking and leaderboard backend for a mobile multiplayer game using Go, Redis and Kubernetes. I'm trying to handle launch-weekend spikes without overpaying.",
+    "interests": [
+      "gaming",
+      "go",
+      "redis",
+      "kubernetes",
+      "autoscaling"
+    ],
+    "lookingFor": "Folks who have tuned autoscaling or load shedding for bursty workloads."
+  },
+  {
+    "id": "p-10",
+    "name": "Larissa Monteiro-Adeyemi",
+    "role": "Data Engineer",
+    "company": "Ventania Energy Data",
+    "building": "I'm building a pipeline that ingests wind and solar sensor readings into PostgreSQL and TimescaleDB for grid forecasting. I'm exploring how to cut cloud costs for long-term storage.",
+    "interests": [
+      "climate",
+      "energy",
+      "postgresql",
+      "data-pipelines",
+      "finops"
+    ],
+    "lookingFor": "People working on time-series storage and cost-efficient archival."
+  },
+  {
+    "id": "p-11",
+    "name": "Osvaldo Brennan-Tupi",
+    "role": "Open-Source Maintainer",
+    "company": "Sambaquí Tech",
+    "building": "I maintain a small Kubernetes operator library written in Go that is used by around two hundred projects. I'm trying to find sustainable ways to review contributions and onboard new maintainers.",
+    "interests": [
+      "open-source",
+      "go",
+      "kubernetes",
+      "maintainers",
+      "mentoring"
+    ],
+    "lookingFor": "Companies and individuals who want to co-maintain or fund the project."
+  },
+  {
+    "id": "p-12",
+    "name": "Pilar Nakamura-Souza",
+    "role": "Computer Science Student",
+    "company": "Universidade Federal do Cerrado",
+    "building": "I'm a final-year student building a thesis project on detecting network anomalies with eBPF and simple machine learning. I'm learning Rust and Linux internals as I go.",
+    "interests": [
+      "ebpf",
+      "rust",
+      "networking",
+      "students",
+      "machine-learning"
+    ],
+    "lookingFor": "A mentor who can review my project and tell me how to start a career in observability."
+  },
+  {
+    "id": "p-13",
+    "name": "Dagmar Osei-Fonseca",
+    "role": "Software Engineer",
+    "company": "Caatinga Cloud",
+    "building": "I'm a first-time speaker preparing a talk on migrating a monolith to GitOps with Argo CD. I'm nervous about live demos and want to make the story practical for beginners.",
+    "interests": [
+      "gitops",
+      "argo-cd",
+      "speaking",
+      "migration",
+      "beginners"
+    ],
+    "lookingFor": "Experienced speakers who can give feedback on my talk outline."
+  },
+  {
+    "id": "p-14",
+    "name": "Everton Kamara",
+    "role": "Platform Engineer",
+    "company": "Orbitwell",
+    "building": "I'm building an internal developer platform on Kubernetes with Crossplane and Backstage for roughly forty product teams. I'm struggling to measure whether developers actually save time.",
+    "interests": [
+      "platform-engineering",
+      "backstage",
+      "crossplane",
+      "kubernetes",
+      "devex"
+    ],
+    "lookingFor": "Platform leads who track adoption and developer satisfaction metrics."
+  },
+  {
+    "id": "p-15",
+    "name": "Mirela Bastos-Eze",
+    "role": "SRE",
+    "company": "Harborlight",
+    "building": "I'm building an AI-assisted incident triage tool that summarizes alerts, traces and runbooks for on-call engineers. It's written in Python with OpenTelemetry data and an open model.",
+    "interests": [
+      "ai-sre",
+      "incident-response",
+      "llm",
+      "opentelemetry",
+      "on-call"
+    ],
+    "lookingFor": "SREs who would trial the tool and tell me where it gets things wrong."
+  },
+  {
+    "id": "p-16",
+    "name": "Cauã Figueiredo-Ng",
+    "role": "Mobile and Web Developer",
+    "company": "Pixote Studio",
+    "building": "I'm building a conference companion app with SvelteKit and Cloudflare Workers that works offline in poor venue Wi-Fi. I'm especially interested in schedule conflict detection and clear accessibility info.",
+    "interests": [
+      "web",
+      "offline-first",
+      "accessibility",
+      "svelte",
+      "events"
+    ],
+    "lookingFor": "Organizers who can share real schedule and accessibility data."
+  },
+  {
+    "id": "p-17",
+    "name": "Henrika Zimmer-Alves",
+    "role": "DevSecOps Lead",
+    "company": "Ferroway",
+    "building": "I'm building a hardened CI platform with ephemeral runners, short-lived credentials and signed build provenance. I'm working through GitHub Actions, Tekton and Kubernetes to make it fast as well as safe.",
+    "interests": [
+      "devsecops",
+      "ci",
+      "supply-chain",
+      "kubernetes",
+      "pipelines"
+    ],
+    "lookingFor": "Teams that have cut CI times without weakening isolation."
+  },
+  {
+    "id": "p-18",
+    "name": "Adaeze Pinheiro",
+    "role": "Staff Data Engineer",
+    "company": "Nimbusary",
+    "building": "I'm building a feature store and vector index for a recommendation system on PostgreSQL, Elasticsearch and Kubernetes. I'm looking for patterns to keep embeddings fresh without huge reindex costs.",
+    "interests": [
+      "data",
+      "vector-search",
+      "postgresql",
+      "elasticsearch",
+      "recommendations"
+    ],
+    "lookingFor": "Engineers with experience in incremental indexing and embedding versioning."
+  }
+]

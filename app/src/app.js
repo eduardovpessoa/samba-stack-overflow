@@ -30,6 +30,40 @@ const FACETS_CACHE_MS = 60 * 1000;
 // Per visitor, and a larger cap per pod as a backstop.
 const SETLIST_SAVES_PER_CLIENT = 6;
 const SETLIST_SAVES_PER_POD = 30;
+// Reads that cost Elasticsearch work (a search is four requests and an
+// embedding). Generous for a person, a ceiling for a script.
+const READS_PER_CLIENT = 240;
+const READS_PER_POD = 1200;
+
+/**
+ * What the page is allowed to load and talk to. Everything is served from
+ * this origin; the one exception is the Dash0 endpoint the browser
+ * monitoring reports to, when that is configured.
+ */
+function contentSecurityPolicy(rumEndpoint) {
+  let monitoring = '';
+  try {
+    if (rumEndpoint) monitoring = ` ${new URL(rumEndpoint).origin}`;
+  } catch {
+    // A malformed endpoint simply is not allowed.
+  }
+  return [
+    "default-src 'self'",
+    "script-src 'self'",
+    // The animation library positions elements with inline style attributes.
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data:",
+    // The build inlines its smallest font files as data: URLs.
+    "font-src 'self' data:",
+    `connect-src 'self'${monitoring}`,
+    "worker-src 'self'",
+    "manifest-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+  ].join('; ');
+}
 // The pod name in the cluster, the host name on a laptop.
 const SERVED_BY = process.env.POD_NAME || os.hostname();
 
@@ -39,18 +73,29 @@ function currentTraceId() {
   return context && isSpanContextValid(context) ? context.traceId : null;
 }
 
-function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, deployEnv = config.deployEnv }) {
+function createApp({
+  store,
+  now = () => Date.now(),
+  opsToken = config.opsToken,
+  deployEnv = config.deployEnv,
+  readLimits = { perClient: READS_PER_CLIENT, perPod: READS_PER_POD },
+}) {
   const app = express();
   const ask = createAsk({ store, openai: config.openai });
   app.disable('x-powered-by');
   // So req.ip is the visitor's address, not the gateway's.
   app.set('trust proxy', config.trustProxyHops);
   app.use(express.json({ limit: '32kb' }));
+  const csp = contentSecurityPolicy(config.rum?.endpoint);
   app.use((req, res, next) => {
     res.set({
       'X-Content-Type-Options': 'nosniff',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       'X-Frame-Options': 'DENY',
+      'Content-Security-Policy': csp,
+      'Strict-Transport-Security': 'max-age=31536000',
+      'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+      'Cross-Origin-Opener-Policy': 'same-origin',
     });
     next();
   });
@@ -100,6 +145,16 @@ function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, 
     return facetsCache.value;
   }
 
+  // A ceiling on the reads that make Elasticsearch work, so a script hitting
+  // the public URL cannot run up the search bill or starve real visitors.
+  const readsByClient = createRateLimiter({ limit: readLimits.perClient, windowMs: 60 * 1000, now });
+  const readsByPod = createRateLimiter({ limit: readLimits.perPod, windowMs: 60 * 1000, now });
+  const limitReads = (req, res, next) => {
+    if (readsByClient.take(req.ip || 'unknown') && readsByPod.take()) return next();
+    res.set('Retry-After', '10');
+    return next(new HttpError(429, 'rate_limited', 'That is a lot of requests. Give it a few seconds.'));
+  };
+
   const requireReady = (req, res, next) => {
     const status = store.status();
     if (status.ready) return next();
@@ -131,7 +186,7 @@ function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, 
     });
   });
 
-  app.get('/api/search', requireReady, async (req, res) => {
+  app.get('/api/search', limitReads, requireReady, async (req, res) => {
     const params = parseSearchParams(req.query);
     const started = performance.now();
     let outcome = 'ok';
@@ -213,14 +268,14 @@ function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, 
     }
   });
 
-  app.get('/api/sessions/:id', requireReady, async (req, res) => {
+  app.get('/api/sessions/:id', limitReads, requireReady, async (req, res) => {
     const [id] = parseIds(req.params.id, 1);
     const session = id ? await store.getSession(id) : null;
     if (!session) throw new HttpError(404, 'not_found', 'No session with that id.');
     res.json({ session, related: await store.related(session, 4) });
   });
 
-  app.post('/api/agenda', requireReady, async (req, res) => {
+  app.post('/api/agenda', limitReads, requireReady, async (req, res) => {
     if (!req.body || !Array.isArray(req.body.ids)) throw badRequest('Send a JSON body like {"ids": ["s-..."]}.');
     const items = await store.getMany(parseIds(req.body.ids));
     const conflicts = findConflicts(items);
@@ -228,7 +283,7 @@ function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, 
     res.json({ items, conflicts });
   });
 
-  app.post('/api/agenda/suggest', requireReady, async (req, res) => {
+  app.post('/api/agenda/suggest', limitReads, requireReady, async (req, res) => {
     if (!req.body || !Array.isArray(req.body.ids)) throw badRequest('Send a JSON body like {"ids": ["s-..."]}.');
     const ids = parseIds(req.body.ids);
     if (ids.length === 0) throw badRequest('Pick at least one talk first.');
@@ -266,7 +321,7 @@ function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, 
     res.status(201).json({ id, count: known.length });
   });
 
-  app.get('/api/setlists/:id', requireReady, async (req, res) => {
+  app.get('/api/setlists/:id', limitReads, requireReady, async (req, res) => {
     const id = parseSetlistId(req.params.id);
     const body = await withSpan('samba.setlist.open', {}, async (span) => {
       const saved = await store.getSetlist(id);
@@ -290,7 +345,7 @@ function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, 
       .send(toIcs(items));
   });
 
-  app.get('/api/people', requireReady, async (req, res) => {
+  app.get('/api/people', limitReads, requireReady, async (req, res) => {
     const params = parsePeopleParams(req.query);
     const started = performance.now();
     const out = await withSpan('samba.people.search', { 'samba.search.query_length': params.q.length }, () =>

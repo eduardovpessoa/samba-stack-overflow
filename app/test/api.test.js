@@ -223,6 +223,48 @@ test('the pod-wide cap is a backstop behind the per-visitor limit', async () => 
   }
 });
 
+test('responses carry the security headers', async () => {
+  const res = await get('/api/meta');
+  const csp = res.headers.get('content-security-policy');
+  for (const part of ["default-src 'self'", "script-src 'self'", "object-src 'none'", "frame-ancestors 'none'", "connect-src 'self'"]) {
+    assert.ok(csp.includes(part), `CSP is missing: ${part}`);
+  }
+  assert.ok(!csp.includes("script-src 'self' 'unsafe-inline'"), 'scripts are never allowed inline');
+  assert.equal(res.headers.get('strict-transport-security'), 'max-age=31536000');
+  assert.equal(res.headers.get('x-content-type-options'), 'nosniff');
+  assert.equal(res.headers.get('x-frame-options'), 'DENY');
+  assert.ok(res.headers.get('permissions-policy').includes('camera=()'));
+});
+
+test('expensive reads are limited per visitor, and probes never are', async () => {
+  const app = createApp({
+    store: createOfflineStore({ sessions, people }),
+    opsToken: '',
+    deployEnv: 'local',
+    now: () => 9_000_000,
+    readLimits: { perClient: 3, perPod: 100 },
+  });
+  const srv = await new Promise((resolve) => {
+    const s = app.listen(0, () => resolve(s));
+  });
+  const url = `http://127.0.0.1:${srv.address().port}`;
+  const search = (client) => fetch(`${url}/api/search?q=kubernetes`, { headers: { 'x-forwarded-for': client } });
+  try {
+    for (let i = 0; i < 3; i += 1) assert.equal((await search('203.0.113.50')).status, 200, `search ${i + 1}`);
+    const refused = await search('203.0.113.50');
+    assert.equal(refused.status, 429);
+    assert.equal(refused.headers.get('retry-after'), '10');
+    assert.equal((await refused.json()).error.code, 'rate_limited');
+    assert.equal((await search('203.0.113.51')).status, 200, 'another visitor is not affected');
+    for (const path of ['/healthz', '/readyz', '/api/meta']) {
+      const res = await fetch(url + path, { headers: { 'x-forwarded-for': '203.0.113.50' } });
+      assert.equal(res.status, 200, `${path} is not limited`);
+    }
+  } finally {
+    await new Promise((resolve) => srv.close(resolve));
+  }
+});
+
 test('calendar export is an ics download', async () => {
   const res = await get(`/api/agenda.ics?ids=${sessions[0].id}`);
   assert.equal(res.status, 200);

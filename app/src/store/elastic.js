@@ -168,9 +168,33 @@ function createElasticStore({ url, apiKey, sessions, people }) {
       ? { ...p, profile: `${p.role}. ${p.building} Interested in ${p.interests.join(', ')}. ${p.lookingFor}` }
       : p;
 
+  /**
+   * The very first request from a fresh pod sometimes hangs for seconds
+   * before it connects (measured in Dash0: 2.7s on two pods, 5.0s on one),
+   * while an immediate retry answers in about 200ms. So the first call gets
+   * a short deadline and a few quick tries instead of being waited out. Only
+   * slowness is retried here: a refused key or a bad URL fails at once.
+   */
+  async function firstContact() {
+    let lastError;
+    for (let attempt = 1; attempt <= 4; attempt += 1) {
+      try {
+        return await client.info({}, { requestTimeout: 2000, maxRetries: 0 });
+      } catch (err) {
+        lastError = err;
+        if (err?.name !== 'TimeoutError' && err?.name !== 'ConnectionError') throw err;
+        log('warn', 'first contact with elasticsearch was slow, trying again', {
+          'samba.retry.attempt': attempt,
+          'error.type': err.name,
+        });
+      }
+    }
+    throw lastError;
+  }
+
   async function init() {
     await withSpan('samba.store.init', { 'db.system.name': 'elasticsearch' }, async (span) => {
-      const info = await client.info();
+      const info = await firstContact();
       state.flavor = info.version?.build_flavor || 'default';
       state.inferenceId = await pickInferenceId();
 

@@ -36,10 +36,14 @@ Open these tabs before you start:
 
 ## 1:15 Observability, with Dash0 (40 s)
 
-1. Open the **Ops** drawer in the footer and switch on the practice incident.
-   Search twice. It is visibly slower.
+1. Open the **Ops** drawer in the footer, paste the ops token (`OPS_TOKEN` in
+   `.env.local`) and switch on the practice incident. Search three times.
 2. Dash0 dashboard: the **Elasticsearch round trips** panel jumps from 4 to
-   16 and p95 latency triples.
+   15. Be honest about latency: inside the cluster each extra round trip
+   costs about 14 ms, so searches only go from about 500 ms to 560 ms. From
+   a slow network the same bug tripled it (0.85 s to 2.5 s). "That is why we
+   chart round trips and not only latency: the bug is there before users
+   feel it."
 3. Show `docs/investigations/2026-11-09-dash0-agent0-slow-search.md`.
    "I asked Agent0 through Dash0's MCP server. It compared a slow and a fast
    trace of the same query and found 12 sequential Elasticsearch calls where
@@ -92,8 +96,11 @@ Only claim what is ticked.
       people matching
 - [x] Dash0: traces, metrics and logs received; dashboard created; Agent0
       investigation through MCP with a shipped fix
-- [ ] Dash0: browser monitoring visible from the deployed site
-- [ ] Radar: app deployed in the team cluster through Argo CD
+- [x] Dash0: telemetry from both cluster pods, with pod and namespace names
+- [x] Dash0: browser monitoring from the deployed site (page views, LCP, CLS)
+- [x] Dash0: practice incident on the cluster shows 4 round trips becoming 15
+- [x] Radar: app deployed in the team cluster through Argo CD (version
+      `7458f9a`, two pods, live at the public URL)
 - [ ] Radar: AI investigation run on a real issue
 - [x] Gitar: pull request #1 reviewed against the project's rules; two real
       findings, one fixed by hand and one by a commit Gitar pushed; area

@@ -2,17 +2,22 @@
 
 const crypto = require('node:crypto');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const express = require('express');
+const { isSpanContextValid, trace } = require('@opentelemetry/api');
 const config = require('./config');
 const { createAsk } = require('./ask');
 const {
   HttpError,
   badRequest,
+  createRateLimiter,
   findConflicts,
   parseIds,
   parsePeopleParams,
   parseSearchParams,
+  parseSetlistBody,
+  parseSetlistId,
   toIcs,
   whyReasons,
 } = require('./logic');
@@ -22,6 +27,15 @@ const CHAOS_MODES = ['off', 'n-plus-one'];
 const CHAOS_TTL_MS = 10 * 60 * 1000; // a practice incident switches itself off
 const CHAOS_CACHE_MS = 3000;
 const FACETS_CACHE_MS = 60 * 1000;
+const SETLIST_SAVES_PER_MINUTE = 20;
+// The pod name in the cluster, the host name on a laptop.
+const SERVED_BY = process.env.POD_NAME || os.hostname();
+
+/** The id of the trace this request belongs to, or null when tracing is off. */
+function currentTraceId() {
+  const context = trace.getActiveSpan()?.spanContext();
+  return context && isSpanContextValid(context) ? context.traceId : null;
+}
 
 function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, deployEnv = config.deployEnv }) {
   const app = express();
@@ -71,6 +85,8 @@ function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, 
         : 'The practice switch is disabled here: no ops token is configured.'
     );
   }
+
+  const setlistSaves = createRateLimiter({ limit: SETLIST_SAVES_PER_MINUTE, windowMs: 60 * 1000, now });
 
   let facetsCache = { value: null, readAt: 0 };
   async function facets() {
@@ -149,6 +165,7 @@ function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, 
             mode: result.mode,
             engine: store.engine,
             total: result.total,
+            diagnostics: { roundTrips, strategy, traceId: currentTraceId(), servedBy: SERVED_BY },
             results: result.hits.map((hit) => ({
               ...hit.session,
               score: hit.score,
@@ -172,7 +189,15 @@ function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, 
         'samba.search.took_ms': tookMs,
         'samba.search.query_length': params.q.length,
       });
-      res.json({ query: body.query, mode: body.mode, engine: body.engine, tookMs, total: body.total, results: body.results });
+      res.json({
+        query: body.query,
+        mode: body.mode,
+        engine: body.engine,
+        tookMs,
+        total: body.total,
+        results: body.results,
+        diagnostics: body.diagnostics,
+      });
     } catch (err) {
       outcome = 'error';
       throw err;
@@ -196,6 +221,46 @@ function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, 
     const conflicts = findConflicts(items);
     if (conflicts.length > 0) instruments.agendaConflicts.add(conflicts.length);
     res.json({ items, conflicts });
+  });
+
+  app.post('/api/agenda/suggest', requireReady, async (req, res) => {
+    if (!req.body || !Array.isArray(req.body.ids)) throw badRequest('Send a JSON body like {"ids": ["s-..."]}.');
+    const ids = parseIds(req.body.ids);
+    if (ids.length === 0) throw badRequest('Pick at least one talk first.');
+    const results = await withSpan('samba.agenda.suggest', { 'samba.agenda.picked': ids.length }, async (span) => {
+      const picked = await store.getMany(ids);
+      const found = await store.suggest(picked, 4);
+      span.setAttributes({ 'samba.agenda.known': picked.length, 'samba.agenda.suggested': found.length });
+      instruments.suggestions.add(1, { 'samba.agenda.outcome': found.length > 0 ? 'found' : 'none' });
+      return { basedOn: picked.length, results: found };
+    });
+    res.json(results);
+  });
+
+  app.post('/api/setlists', requireReady, async (req, res) => {
+    const { ids, name } = parseSetlistBody(req.body);
+    // Anyone can call this, so each pod only accepts a bounded number a minute.
+    if (!setlistSaves.take()) {
+      res.set('Retry-After', '30');
+      throw new HttpError(429, 'rate_limited', 'Too many setlists are being shared right now. Try again in a moment.');
+    }
+    const known = (await store.getMany(ids)).map((s) => s.id);
+    if (known.length === 0) throw badRequest('None of those talks exist.');
+    const id = crypto.randomBytes(9).toString('base64url');
+    await withSpan('samba.setlist.save', { 'samba.setlist.count': known.length }, () =>
+      store.saveSetlist({ id, ids: known, name, createdAt: new Date(now()).toISOString() })
+    );
+    instruments.setlistsSaved.add(1);
+    log('info', 'setlist saved', { 'samba.setlist.count': known.length, 'samba.setlist.named': name.length > 0 });
+    res.status(201).json({ id, count: known.length });
+  });
+
+  app.get('/api/setlists/:id', requireReady, async (req, res) => {
+    const id = parseSetlistId(req.params.id);
+    const saved = await store.getSetlist(id);
+    if (!saved) throw new HttpError(404, 'not_found', 'No setlist with that id.');
+    const items = await store.getMany(saved.ids);
+    res.json({ id, name: saved.name || '', createdAt: saved.createdAt, items, conflicts: findConflicts(items) });
   });
 
   app.get('/api/agenda.ics', requireReady, async (req, res) => {
@@ -252,7 +317,17 @@ function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, 
   // --- frontend (built by web/, copied to app/public in the image) ---
   const publicDir = path.join(__dirname, '..', 'public');
   if (fs.existsSync(path.join(publicDir, 'index.html'))) {
-    app.use(express.static(publicDir, { index: false, maxAge: '1h' }));
+    app.use(
+      express.static(publicDir, {
+        index: false,
+        maxAge: '1h',
+        setHeaders(res, filePath) {
+          // The service worker and the manifest must be re-checked on every
+          // load, or an installed app could keep an old one for an hour.
+          if (/(^|[\\/])(sw\.js|manifest\.webmanifest)$/.test(filePath)) res.setHeader('Cache-Control', 'no-cache');
+        },
+      })
+    );
     app.get(/.*/, (req, res) => res.set('Cache-Control', 'no-cache').sendFile(path.join(publicDir, 'index.html')));
   } else {
     app.get('/', (req, res) =>

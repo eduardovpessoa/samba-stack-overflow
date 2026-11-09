@@ -75,6 +75,10 @@ function createElasticStore({ url, apiKey, sessions, people }) {
   const sessionsIndex = `samba-sessions-${hashOf(sessions)}`;
   const peopleIndex = `samba-people-${hashOf(people)}`;
 
+  // Shared setlists are written by visitors, so they live in their own index
+  // with a fixed name: they must survive a change of the demo dataset.
+  const setlistsIndex = 'samba-setlists';
+
   const state = { ready: false, reason: 'starting', semantic: false, inferenceId: null, flavor: 'unknown' };
 
   /** Prefer the Jina embeddings that ship with Elastic Cloud, when present. */
@@ -126,6 +130,25 @@ function createElasticStore({ url, apiKey, sessions, people }) {
     return false;
   }
 
+  async function ensureSetlistsIndex() {
+    if (await client.indices.exists({ index: setlistsIndex })) return;
+    try {
+      await client.indices.create({
+        index: setlistsIndex,
+        mappings: {
+          properties: {
+            ids: { type: 'keyword' },
+            name: { type: 'text' },
+            count: { type: 'integer' },
+            createdAt: { type: 'date' },
+          },
+        },
+      });
+    } catch (err) {
+      if (!isAlreadyExists(err)) throw err;
+    }
+  }
+
   async function seed(index, docs, toDoc) {
     const { count } = await client.count({ index });
     if (count === docs.length) return false;
@@ -153,6 +176,7 @@ function createElasticStore({ url, apiKey, sessions, people }) {
 
       const sessionsSemantic = await ensureIndex(sessionsIndex, sessionProperties(), 'semantic', state.inferenceId);
       const peopleSemantic = await ensureIndex(peopleIndex, peopleProperties(), 'profile', state.inferenceId);
+      await ensureSetlistsIndex();
       const seededSessions = await seed(sessionsIndex, sessions, (s) => sessionDoc(s, sessionsSemantic));
       const seededPeople = await seed(peopleIndex, people, (p) => personDoc(p, peopleSemantic));
 
@@ -350,6 +374,51 @@ function createElasticStore({ url, apiKey, sessions, people }) {
     return res.hits.hits.map(toSession);
   }
 
+  /**
+   * Sessions that fit the free time around `picked` and are close to it in
+   * meaning, in one request: the semantic query ranks, and one date-range
+   * exclusion per picked session removes everything that would clash.
+   */
+  async function suggest(picked, size = 4) {
+    if (picked.length === 0) return [];
+    const text = picked
+      .map((s) => `${s.title}. ${s.tags.join(', ')}`)
+      .join(' ')
+      .slice(0, 1500);
+    const overlaps = (s) => ({ bool: { filter: [{ range: { start: { lt: s.end } } }, { range: { end: { gt: s.start } } }] } });
+    const res = await client.search({
+      index: sessionsIndex,
+      size,
+      _source: { excludes: SESSION_SOURCE_EXCLUDES },
+      query: {
+        bool: {
+          must: [
+            state.semantic
+              ? { semantic: { field: 'semantic', query: text } }
+              : { multi_match: { query: text, fields: ['title^2', 'tags.text^2', 'description'] } },
+          ],
+          must_not: [{ ids: { values: picked.map((s) => s.id) } }, ...picked.map(overlaps)],
+        },
+      },
+    });
+    return res.hits.hits.map(toSession);
+  }
+
+  async function saveSetlist({ id, ids, name, createdAt }) {
+    await client.index({
+      index: setlistsIndex,
+      id,
+      op_type: 'create',
+      document: { ids, name, count: ids.length, createdAt },
+    });
+  }
+
+  async function getSetlist(id) {
+    // A GET by id is real-time, so a link works the moment it is created.
+    const res = await client.get({ index: setlistsIndex, id }, { ignore: [404] });
+    return res.found ? { id, ...res._source } : null;
+  }
+
   async function facets() {
     const terms = (field, order) => ({ terms: { field, size: 50, ...(order ? { order } : {}) } });
     const res = await client.search({
@@ -422,6 +491,9 @@ function createElasticStore({ url, apiKey, sessions, people }) {
     getSession,
     related,
     getMany,
+    suggest,
+    saveSetlist,
+    getSetlist,
     facets,
     searchPeople,
     getFlag,

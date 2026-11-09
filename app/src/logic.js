@@ -88,6 +88,49 @@ function parseIds(value, max = 60) {
   return unique;
 }
 
+/** Validate the body of POST /api/setlists. The name is stored and shown as plain text. */
+function parseSetlistBody(body) {
+  if (!body || !Array.isArray(body.ids)) {
+    throw badRequest('Send a JSON body like {"ids": ["s-..."], "name": "optional"}.');
+  }
+  const ids = parseIds(body.ids);
+  if (ids.length === 0) throw badRequest('A setlist needs at least one talk.');
+  let name = '';
+  if (body.name !== undefined && body.name !== null) {
+    if (typeof body.name !== 'string') throw badRequest('name must be text.');
+    name = body.name
+      .replace(/[\u0000-\u001f\u007f]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (name.length > 60) throw badRequest('name must be 60 characters or fewer.');
+  }
+  return { ids, name };
+}
+
+/** A setlist id from the URL. Anything that cannot be one is simply "not found". */
+function parseSetlistId(value) {
+  const id = oneString(value);
+  if (!/^[A-Za-z0-9_-]{8,24}$/.test(id)) throw new HttpError(404, 'not_found', 'No setlist with that id.');
+  return id;
+}
+
+/**
+ * A small sliding-window limiter for public write endpoints. It is per
+ * process, so it bounds what one pod will accept, not the whole deployment.
+ */
+function createRateLimiter({ limit, windowMs, now = () => Date.now() }) {
+  let stamps = [];
+  return {
+    take() {
+      const cutoff = now() - windowMs;
+      stamps = stamps.filter((t) => t > cutoff);
+      if (stamps.length >= limit) return false;
+      stamps.push(now());
+      return true;
+    },
+  };
+}
+
 /**
  * Turn Elasticsearch highlight text (wrapped in private marker characters,
  * never HTML) into segments the frontend renders as plain text and <mark>.
@@ -273,12 +316,15 @@ module.exports = {
   HttpError,
   MODES,
   badRequest,
+  createRateLimiter,
   findConflicts,
   keywordText,
   levelIntent,
   parseIds,
   parsePeopleParams,
   parseSearchParams,
+  parseSetlistBody,
+  parseSetlistId,
   toIcs,
   toSegments,
   whyReasons,

@@ -31,6 +31,7 @@ function segmentsFor(text, wanted) {
 
 function createOfflineStore({ sessions, people }) {
   const flags = new Map();
+  const setlists = new Map();
 
   function matches(session, filters) {
     if (filters.day && session.day !== filters.day) return false;
@@ -99,6 +100,16 @@ function createOfflineStore({ sessions, people }) {
       sessions.filter((s) => s.id !== session.id && s.track === session.track).slice(0, size),
     getMany: async (ids) =>
       sessions.filter((s) => ids.includes(s.id)).sort((a, b) => Date.parse(a.start) - Date.parse(b.start)),
+    // Crude stand-in: same-track sessions that do not clash, in schedule order.
+    suggest: async (picked, size = 4) => {
+      const taken = new Set(picked.map((s) => s.id));
+      const tracks = new Set(picked.map((s) => s.track));
+      const clashes = (s) =>
+        picked.some((p) => Date.parse(s.start) < Date.parse(p.end) && Date.parse(p.start) < Date.parse(s.end));
+      return sessions.filter((s) => !taken.has(s.id) && tracks.has(s.track) && !clashes(s)).slice(0, size);
+    },
+    saveSetlist: async (doc) => void setlists.set(doc.id, { ids: doc.ids, name: doc.name, count: doc.ids.length, createdAt: doc.createdAt }),
+    getSetlist: async (id) => (setlists.has(id) ? { id, ...setlists.get(id) } : null),
     facets,
     searchPeople: async ({ q, size }) => {
       const wanted = new Set(tokens(q));

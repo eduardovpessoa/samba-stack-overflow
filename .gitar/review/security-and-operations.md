@@ -13,6 +13,18 @@ shared hackathon cluster with a public URL.
 - The only token the browser may receive is `DASH0_RUM_TOKEN`, an ingest-only
   token. Flag any other secret reaching `/api/meta` or the frontend bundle.
 
+## Public write endpoints
+
+The site is public, so anything that writes is open to the internet.
+
+- Every endpoint that writes to Elasticsearch on behalf of a visitor must be
+  bounded: a size cap on the body, validated ids, and a rate limit. Flag a new
+  write route that has none of these.
+- Text a visitor supplies (a setlist name) is stored and rendered as plain
+  text only. Flag any path where it could be interpreted as HTML or as part
+  of a query.
+- Operator-only actions need the ops token, compared in constant time.
+
 ## Telemetry
 
 - Every new route or Elasticsearch operation that can be slow gets a span via

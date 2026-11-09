@@ -16,6 +16,10 @@ November 9, 2026).
 *An independent hackathon project. It is not affiliated with or endorsed by
 Stack Overflow or Stack Exchange Inc.*
 
+<img width="1920" height="1200" alt="Screenshot From 2026-11-09 16-35-53" src="https://github.com/user-attachments/assets/b0737a95-6b1c-4648-9003-e72d2af4417c" />
+<img width="1920" height="1200" alt="Screenshot From 2026-11-09 16-36-28" src="https://github.com/user-attachments/assets/f1beda31-86d9-4a21-8f3b-15f68311afac" />
+
+
 ## What it does
 
 - **Ask in plain language.** "I'm a backend developer new to eBPF, what

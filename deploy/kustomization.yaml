@@ -10,5 +10,5 @@ resources:
   - httproute.yaml
 images:
   - name: app
-    newName: ghcr.io/OWNER/REPO
-    newTag: latest
+    newName: ghcr.io/eduardovpessoa/samba-stack-overflow
+    newTag: 7458f9a

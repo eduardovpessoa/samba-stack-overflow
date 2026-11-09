@@ -1,4 +1,96 @@
-# samba-stack-overflow
-# samba-stack-overflow
-# samba-stack-overflow
-# samba-stack-overflow
+# Samba Stack Overflow 🇧🇷
+
+**Find your talk. Find your people.**
+
+A conference companion with a little Brazilian rhythm. Describe what you care
+about in your own words, get the talks that fit and the reason each one fits,
+build a personal agenda (your *setlist*) that warns you about clashes, and
+find people building similar things (your *roda*, the circle where samba
+happens).
+
+Built solo in one afternoon at the Cloud Native Hackathon (Salt Lake City,
+November 9, 2026).
+
+Live: https://samba-stack-overflow.cnh.radarhq.io
+
+## What it does
+
+- **Ask in plain language.** "I'm a backend developer new to eBPF, what
+  should I attend?" works as well as `ebpf`.
+- **See why it matched.** Every result shows its rank in the keyword search
+  and in the meaning search, the passage that matched, and plain reasons.
+- **Setlist.** Pick talks, see time clashes, export to your calendar.
+- **Accessibility first.** Filter by captions, step-free access, sign
+  language and low-sensory rooms. Anything the organisers have not published
+  is shown as "Not published", never guessed.
+- **Roda.** Say what you are building and meet similar profiles.
+
+The schedule and the people are an openly labelled **demo dataset**.
+
+## How it is built
+
+```
+ browser ──▶ Node.js backend ──▶ Elasticsearch Serverless
+ (React)     (one container)      semantic_text + Jina embeddings
+                  │                hybrid search with RRF
+                  └─ OpenTelemetry ──▶ Dash0 (traces, metrics, logs)
+
+ git push ──▶ GitHub Actions ──▶ GHCR ──▶ Argo CD ──▶ Kubernetes
+     │                                                    ▲
+     └─ pull request ──▶ Gitar review                     └─ Radar
+```
+
+| | What it does here |
+|---|---|
+| **Elasticsearch** | The only data store. Sessions and profiles are indexed with a `semantic_text` field (Jina embeddings, sentence-sized chunks). Each search fuses a keyword query and a semantic query with reciprocal rank fusion, and the semantic highlighter returns the passage that matched. Facets, agenda lookups and people matching are Elasticsearch queries too. |
+| **Dash0** | OpenTelemetry auto-instrumentation plus custom spans, metrics and logs. `samba.search.es_round_trips` records how many Elasticsearch calls one search needed, which is how the N+1 regression shows up. |
+| **Radar** | The app runs in the team's cluster, deployed by Argo CD on every push to `main`. Radar shows the rollout, the topology and the timeline, and runs the AI investigation when something breaks. |
+| **Gitar** | Every feature lands through a pull request that Gitar reviews against this project's own rules in `.gitar/review/` and `.gitar/rules/`. |
+
+## Run it locally
+
+```bash
+cp .env.example .env
+```
+
+Fill in the Elasticsearch and Dash0 values, then:
+
+```bash
+cd app && npm install && npm run dev
+```
+
+```bash
+cd web && npm install && npm run dev
+```
+
+Open http://localhost:5173. Without Elasticsearch credentials the backend
+starts a crude offline fallback and says so in the UI: it is for development
+only and is never presented as Elasticsearch.
+
+## Deploy
+
+Pushing to `main` builds the image and Argo CD rolls it out. Credentials are
+never in git: they live in a Kubernetes Secret named `app-credentials` in
+namespace `team-samba-stack-overflow`, with these keys:
+
+`elasticsearch-url`, `elasticsearch-api-key`, `dash0-otlp-endpoint`,
+`dash0-auth-token`, and optionally `dash0-rum-token` and `openai-api-key`.
+
+## Practice incident
+
+The Ops drawer in the footer has a switch that makes search enrich each
+result with its own Elasticsearch query instead of one batched query. It is a
+real N+1 regression, not a sleep, and it switches itself off after ten
+minutes. Turn it on, watch `samba.search.duration` and
+`samba.search.es_round_trips` in Dash0, and ask Agent0 what changed.
+
+## Repository map
+
+| Path | What is there |
+|---|---|
+| `app/` | Backend: API, Elasticsearch store, telemetry, tests |
+| `web/` | Frontend: React, TypeScript, Vite |
+| `docs/api.md` | The API contract both sides follow |
+| `deploy/`, `argocd/` | Kubernetes manifests and the Argo CD Application |
+| `.gitar/` | Gitar review instructions, repository rules, auto-apply criteria |
+| `AGENTS.md` | Conventions for coding and review agents |

@@ -28,6 +28,9 @@ And have ready:
   recording so it is never on screen.
 - Your **phone**, with the app open, if you want to show it installed.
 - A clean setlist: open the app and remove any talks left from testing.
+- **Nothing personal on screen.** Radar Cloud shows your email at the bottom
+  of its sidebar: collapse the sidebar with the « button first. Check Dash0
+  for the same. Never show `.env`, `.env.local` or a terminal with tokens.
 
 ## Scene 1. Hello (20 seconds)
 

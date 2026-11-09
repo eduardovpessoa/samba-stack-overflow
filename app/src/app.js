@@ -271,11 +271,14 @@ function createApp({ store, now = () => Date.now(), opsToken = config.opsToken, 
     const body = await withSpan('samba.setlist.open', {}, async (span) => {
       const saved = await store.getSetlist(id);
       span.setAttribute('samba.setlist.found', Boolean(saved));
-      if (!saved) throw new HttpError(404, 'not_found', 'No setlist with that id.');
+      // A stale or mistyped link is an expected outcome, not a failure: it
+      // is recorded as found=false and must not mark the span as an error.
+      if (!saved) return null;
       const items = await store.getMany(saved.ids);
       span.setAttribute('samba.setlist.count', items.length);
       return { id, name: saved.name || '', createdAt: saved.createdAt, items, conflicts: findConflicts(items) };
     });
+    if (!body) throw new HttpError(404, 'not_found', 'No setlist with that id.');
     res.json(body);
   });
 

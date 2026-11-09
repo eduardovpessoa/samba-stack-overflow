@@ -143,7 +143,7 @@ Only claim what is ticked.
 - [x] Dash0: browser monitoring from the deployed site (page views, LCP, CLS)
 - [x] Dash0: practice incident on the cluster shows 4 round trips becoming 15
 - [x] Radar: app deployed in the team cluster through Argo CD (two pods on
-      two nodes, live at the public URL, three releases so far)
+      two nodes, live at the public URL)
 - [x] Radar: timeline, issues, Checks and diagnosis read through Radar's MCP
       server while shipping
 - [x] Radar: hosted AI investigation on Deployment `app` (healthy, certainty
